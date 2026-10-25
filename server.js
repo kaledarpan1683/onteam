@@ -50,9 +50,9 @@ app.delete('/api/super-alpha/companies/:id', async (req, res) => {
     res.json({ success: true, message: 'Company deleted successfully.' });
 });
 
-// 3. Users CRUD (Supporting 6-Tier Hierarchy & Edits)
+// 3. Users CRUD (Including password_hash visibility for Super-Alpha)
 app.get('/api/super-alpha/users', async (req, res) => {
-    const { data, error } = await supabase.from('users').select('id, company_id, name, email, role, department, created_at').order('id', { ascending: false });
+    const { data, error } = await supabase.from('users').select('id, company_id, name, email, password_hash, role, department, created_at').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching users' });
     res.json({ success: true, users: data });
 });
@@ -60,7 +60,6 @@ app.get('/api/super-alpha/users', async (req, res) => {
 app.post('/api/super-alpha/users', async (req, res) => {
     const { company_id, name, email, password_hash, role, department } = req.body;
     
-    // Prevent creating Super-Alpha-Admin from UI
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Super-Alpha-Admin can only be seeded via database.' });
     }
@@ -71,21 +70,26 @@ app.post('/api/super-alpha/users', async (req, res) => {
         .select()
         .single();
 
-    if (error) return res.status(500).json({ success: false, message: 'Failed to create user (Email may already exist).' });
+    if (error) return res.status(500).json({ success: false, message: 'Failed to create user.' });
     res.json({ success: true, message: 'User created successfully!', user: data });
 });
 
 app.put('/api/super-alpha/users/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, email, role, department, company_id } = req.body;
+    const { name, email, password_hash, role, department, company_id } = req.body;
 
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Cannot assign Super-Alpha-Admin role.' });
     }
 
+    const updateData = { name, email, role, department, company_id: company_id || null };
+    if (password_hash && password_hash.trim() !== '') {
+        updateData.password_hash = password_hash;
+    }
+
     const { error } = await supabase
         .from('users')
-        .update({ name, email, role, department, company_id: company_id || null })
+        .update(updateData)
         .eq('id', id);
 
     if (error) return res.status(500).json({ success: false, message: 'Failed to update user.' });
