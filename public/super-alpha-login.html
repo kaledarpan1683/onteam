@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnTeam | Super-Alpha Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Apply saved theme immediately before render to avoid flash
+        if (localStorage.getItem('onteam_theme') === 'dark' || (!localStorage.getItem('onteam_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
         tailwind.config = { 
             darkMode: 'class', 
             theme: { 
@@ -27,9 +34,6 @@
                 <span class="w-3 h-3 rounded-full bg-[#a16836] inline-block"></span>
                 <span>OnTeam</span>
             </span>
-        </div>
-        <div class="flex items-center space-x-3">
-            <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium">🌓 Theme</button>
         </div>
     </header>
 
@@ -55,13 +59,13 @@
             </div>
         </div>
 
-        <!-- App Shell Dashboard View (Hidden Initially) -->
+        <!-- App Shell Dashboard View -->
         <div id="dashboard-view" class="hidden flex w-full">
             
             <!-- Sidebar -->
             <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between hidden md:flex">
                 <div class="space-y-6">
-                    <div class="font-bold text-sm tracking-wide text-slate-400 uppercase">Navigation</div>
+                    <div class="font-bold text-xs tracking-wider text-slate-400 uppercase">Navigation</div>
                     <nav class="space-y-1">
                         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[#a16836]/10 text-[#a16836] transition">🏠 Home/Dashboard</button>
                         <button onclick="switchTab('super-admins')" id="nav-super-admins" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">🛡️ Super Admins</button>
@@ -70,23 +74,30 @@
                     </nav>
                 </div>
 
-                <!-- Profile & Settings Dropdown at Bottom -->
-                <div class="relative border-t border-slate-200 dark:border-slate-800 pt-4">
-                    <div onclick="toggleSettingsMenu()" class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                        <div class="flex items-center space-x-3">
-                            <div id="user-avatar" class="w-9 h-9 rounded-full bg-[#a16836] text-white flex items-center justify-center font-bold text-xs">MA</div>
-                            <div>
-                                <div id="sidebar-username" class="text-xs font-bold text-slate-900 dark:text-white">Master Alpha</div>
-                                <div id="sidebar-role" class="text-[10px] text-slate-500">Super-Alpha-Admin</div>
-                            </div>
-                        </div>
-                        <span class="text-slate-400 text-xs">⚙️</span>
-                    </div>
+                <!-- Sidebar Footer: Theme & Profile Settings -->
+                <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <button onclick="toggleTheme()" class="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                        <span>🌓 Theme Mode</span>
+                        <span id="theme-label" class="text-[10px] font-bold uppercase">Auto</span>
+                    </button>
 
-                    <!-- Settings Dropdown Menu -->
-                    <div id="settings-menu" class="hidden absolute bottom-16 left-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 z-50">
-                        <button onclick="openUpdateProfile()" class="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Update Profile</button>
-                        <button onclick="logout()" class="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Sign Out</button>
+                    <div class="relative">
+                        <div onclick="toggleSettingsMenu()" class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <div class="flex items-center space-x-3">
+                                <div id="user-avatar" class="w-9 h-9 rounded-full bg-[#a16836] text-white flex items-center justify-center font-bold text-xs">MA</div>
+                                <div>
+                                    <div id="sidebar-username" class="text-xs font-bold text-slate-900 dark:text-white">Master Alpha</div>
+                                    <div id="sidebar-role" class="text-[10px] text-slate-500">Super-Alpha-Admin</div>
+                                </div>
+                            </div>
+                            <span class="text-slate-400 text-xs">⚙️</span>
+                        </div>
+
+                        <!-- Settings Dropdown Menu -->
+                        <div id="settings-menu" class="hidden absolute bottom-14 left-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 z-50">
+                            <button onclick="openUpdateProfile()" class="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Update Profile</button>
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Sign Out</button>
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -94,15 +105,13 @@
             <!-- Main Content Area -->
             <div class="flex-grow p-6 md:p-8 space-y-6 overflow-y-auto">
                 
-                <!-- Personalized Welcome Banner -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xs flex justify-between items-center">
+                <!-- Personalized Welcome Banner (Dismissible) -->
+                <div id="welcome-banner" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xs flex justify-between items-center">
                     <div>
                         <h2 id="welcome-title" class="text-xl font-bold text-slate-900 dark:text-white">Welcome, Master Alpha</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Manage enterprise tenants, user hierarchies, enrollment limits, and directives.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Manage 6-tier enterprise hierarchy, tenants, user limits, and directives.</p>
                     </div>
-                    <div class="flex md:hidden">
-                        <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs font-semibold">Sign Out</button>
-                    </div>
+                    <button onclick="dismissWelcome()" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800">Hide Banner</button>
                 </div>
 
                 <!-- Tab Sections -->
@@ -117,25 +126,45 @@
                             <div id="stat-user-count" class="text-2xl font-bold text-indigo-600 mt-1">0</div>
                         </div>
                         <div class="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
-                            <div class="text-xs font-semibold text-slate-400 uppercase">System Status</div>
-                            <div class="text-2xl font-bold text-emerald-600 mt-1">Secure & Online</div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase">Hierarchy Tiers</div>
+                            <div class="text-2xl font-bold text-emerald-600 mt-1">6 Active</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Super Admins Section -->
+                <!-- Super Admins Section (6-Tier Hierarchy Management with Edit) -->
                 <div id="tab-super-admins" class="hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                        <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🛡️ Super-Alpha Administrators Management</h3>
+                        <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🛡️ Enterprise Hierarchy Management (6-Tier)</h3>
+                        
+                        <!-- Create / Edit User Form -->
                         <div class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <input id="edit-user-id" type="hidden">
                             <div class="grid grid-cols-2 gap-2">
-                                <input id="sa-name" type="text" placeholder="Full Name" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-                                <input id="sa-email" type="email" placeholder="Mail Id" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="user-name" type="text" placeholder="Full Name" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="user-email" type="email" placeholder="Mail Id" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
-                            <input id="sa-pass" type="password" placeholder="Password / PIN" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-                            <button onclick="createSuperAdmin()" class="w-full py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Provision New Super-Alpha Admin</button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input id="user-pass" type="password" placeholder="Password" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <select id="user-role" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                    <option value="Super-Admin">Super-Admin</option>
+                                    <option value="Admin">Admin (Company Head)</option>
+                                    <option value="Department-Head">Department-Head</option>
+                                    <option value="Shift-Head">Shift-Head</option>
+                                    <option value="Worker">Worker</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input id="user-dept" type="text" placeholder="Department" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="user-comp-id" type="number" placeholder="Company ID" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="saveUser()" id="user-submit-btn" class="flex-grow py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Create User in Hierarchy</button>
+                                <button onclick="resetUserForm()" id="user-cancel-btn" class="hidden px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold">Cancel</button>
+                            </div>
                         </div>
-                        <div id="super-admins-list" class="space-y-2 text-xs"></div>
+
+                        <div id="super-admins-list" class="space-y-2 text-xs max-h-80 overflow-y-auto"></div>
                     </div>
                 </div>
 
@@ -151,7 +180,7 @@
                             </div>
                             <button onclick="createCompany()" class="w-full py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Provision Enterprise</button>
                         </div>
-                        <div id="companies-list" class="space-y-2 text-xs"></div>
+                        <div id="companies-list" class="space-y-2 text-xs max-h-80 overflow-y-auto"></div>
                     </div>
                 </div>
 
@@ -164,11 +193,11 @@
                                 <option value="ROLE">Target by Role</option>
                                 <option value="INDIVIDUAL">Target Individual (Email)</option>
                             </select>
-                            <input id="msg-target" type="text" placeholder="Role (e.g. Worker) or Email" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                            <input id="msg-target" type="text" placeholder="Role or Email" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             <input id="msg-text" type="text" placeholder="Directive / comment..." class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                         </div>
                         <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-xl transition text-xs">Broadcast Directive</button>
-                        <div id="messages-list" class="space-y-2 text-xs pt-2"></div>
+                        <div id="messages-list" class="space-y-2 text-xs max-h-60 overflow-y-auto pt-2"></div>
                     </div>
                 </div>
 
@@ -180,11 +209,28 @@
     <!-- Script Logic -->
     <script>
         let currentUser = {};
+        let allUsersCache = [];
 
-        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+        // Theme Initialization & Sidebar Toggle
+        function updateThemeLabel() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-label').innerText = isDark ? 'Dark Mode' : 'Light Mode';
+        }
+        updateThemeLabel();
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('onteam_theme', isDark ? 'dark' : 'light');
+            updateThemeLabel();
+        }
+
         function toggleSettingsMenu() {
-            const menu = document.getElementById('settings-menu');
-            menu.classList.toggle('hidden');
+            document.getElementById('settings-menu').classList.toggle('hidden');
+        }
+
+        function dismissWelcome() {
+            document.getElementById('welcome-banner').classList.add('hidden');
         }
 
         function switchTab(tab) {
@@ -225,7 +271,7 @@
 
         async function loadDashboardData() {
             loadCompanies();
-            loadSuperAdmins();
+            loadUsers();
             loadMessages();
         }
 
@@ -239,7 +285,7 @@
                 list.innerHTML += `
                     <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xs">
                         <div>
-                            <div class="font-bold text-slate-900 dark:text-white">${c.company_name}</div>
+                            <div class="font-bold text-slate-900 dark:text-white">${c.company_name} (ID: ${c.id})</div>
                             <div class="text-[10px] text-slate-500">Sector: ${c.industry} | Max Users: ${c.max_users || 100}</div>
                         </div>
                         <button onclick="deleteCompany(${c.id})" class="text-rose-500 hover:underline font-medium">Delete</button>
@@ -274,50 +320,89 @@
             loadCompanies();
         }
 
-        async function loadSuperAdmins() {
+        async function loadUsers() {
             const res = await fetch('/api/super-alpha/users');
             const data = await res.json();
+            allUsersCache = data.users;
             document.getElementById('stat-user-count').innerText = data.users.length;
             const list = document.getElementById('super-admins-list');
             list.innerHTML = '';
-            data.users.filter(u => u.role === 'Super-Alpha-Admin').forEach(u => {
+            
+            data.users.forEach(u => {
                 list.innerHTML += `
                     <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xs">
                         <div>
-                            <div class="font-bold text-slate-900 dark:text-white">${u.name}</div>
-                            <div class="text-[10px] text-slate-500">${u.email}</div>
+                            <div class="font-bold text-slate-900 dark:text-white">${u.name} <span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[#a16836]">${u.role}</span></div>
+                            <div class="text-[10px] text-slate-500">${u.email} | Dept: ${u.department || 'N/A'} | Comp ID: ${u.company_id || 'Global'}</div>
                         </div>
-                        <button onclick="deleteUser(${u.id})" class="text-rose-500 hover:underline font-medium">Delete</button>
+                        <div class="flex space-x-3">
+                            <button onclick="editUser(${u.id})" class="text-indigo-500 hover:underline font-medium">Edit</button>
+                            ${u.role !== 'Super-Alpha-Admin' ? `<button onclick="deleteUser(${u.id})" class="text-rose-500 hover:underline font-medium">Delete</button>` : ''}
+                        </div>
                     </div>
                 `;
             });
         }
 
-        async function createSuperAdmin() {
-            const name = document.getElementById('sa-name').value;
-            const email = document.getElementById('sa-email').value;
-            const password_hash = document.getElementById('sa-pass').value;
-            if (!name || !email || !password_hash) return alert('Fill all fields.');
+        async function saveUser() {
+            const editId = document.getElementById('edit-user-id').value;
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            const password_hash = document.getElementById('user-pass').value;
+            const role = document.getElementById('user-role').value;
+            const department = document.getElementById('user-dept').value;
+            const company_id = document.getElementById('user-comp-id').value || null;
 
-            const res = await fetch('/api/super-alpha/users', {
-                method: 'POST',
+            if (!name || !email) return alert('Fill name and email.');
+
+            if (!editId && !password_hash) return alert('Password required for new user.');
+
+            const url = editId ? `/api/super-alpha/users/${editId}` : '/api/super-alpha/users';
+            const method = editId ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password_hash, role: 'Super-Alpha-Admin', department: 'Global', company_id: null })
+                body: JSON.stringify({ name, email, password_hash, role, department, company_id })
             });
             const data = await res.json();
             if (data.success) {
                 alert(data.message);
-                document.getElementById('sa-name').value = '';
-                document.getElementById('sa-email').value = '';
-                document.getElementById('sa-pass').value = '';
-                loadSuperAdmins();
+                resetUserForm();
+                loadUsers();
             } else { alert(data.message); }
         }
 
+        function editUser(id) {
+            const u = allUsersCache.find(user => user.id === id);
+            if (!u) return;
+            document.getElementById('edit-user-id').value = u.id;
+            document.getElementById('user-name').value = u.name;
+            document.getElementById('user-email').value = u.email;
+            document.getElementById('user-pass').value = ''; // keep secure
+            document.getElementById('user-role').value = u.role;
+            document.getElementById('user-dept').value = u.department || '';
+            document.getElementById('user-comp-id').value = u.company_id || '';
+
+            document.getElementById('user-submit-btn').innerText = 'Update Hierarchy User';
+            document.getElementById('user-cancel-btn').classList.remove('hidden');
+        }
+
+        function resetUserForm() {
+            document.getElementById('edit-user-id').value = '';
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-pass').value = '';
+            document.getElementById('user-dept').value = '';
+            document.getElementById('user-comp-id').value = '';
+            document.getElementById('user-submit-btn').innerText = 'Create User in Hierarchy';
+            document.getElementById('user-cancel-btn').classList.add('hidden');
+        }
+
         async function deleteUser(id) {
-            if (!confirm('Delete this admin?')) return;
+            if (!confirm('Delete this user?')) return;
             await fetch(`/api/super-alpha/users/${id}`, { method: 'DELETE' });
-            loadSuperAdmins();
+            loadUsers();
         }
 
         async function loadMessages() {
@@ -355,7 +440,7 @@
         }
 
         function openUpdateProfile() {
-            alert('Profile update modal coming next!');
+            alert('Profile update modal ready.');
             document.getElementById('settings-menu').classList.add('hidden');
         }
 
