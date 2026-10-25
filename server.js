@@ -24,7 +24,7 @@ app.post('/api/super-alpha/login', async (req, res) => {
     res.json({ success: true, token: 'ALPHA_SECURE_TOKEN', adminName: data.name });
 });
 
-// 2. Companies CRUD with Expanded Profile Fields
+// 2. Companies CRUD with Unified Limits & Profile Fields
 app.get('/api/super-alpha/companies', async (req, res) => {
     const { data, error } = await supabase.from('companies').select('*').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching companies' });
@@ -33,6 +33,11 @@ app.get('/api/super-alpha/companies', async (req, res) => {
 
 app.post('/api/super-alpha/companies', async (req, res) => {
     const { company_name, industry, max_users, logo_url, contact_person, contact_phone, contact_email, company_size } = req.body;
+    
+    if (!company_name) {
+        return res.status(400).json({ success: false, message: 'Company name is required.' });
+    }
+
     const { data, error } = await supabase
         .from('companies')
         .insert([{ 
@@ -43,13 +48,13 @@ app.post('/api/super-alpha/companies', async (req, res) => {
             contact_person: contact_person || 'N/A',
             contact_phone: contact_phone || 'N/A',
             contact_email: contact_email || 'N/A',
-            company_size: company_size || '1-50',
+            company_size: company_size || '1-50 Employees (Limit: 100)',
             status: 'Active' 
         }])
         .select()
         .single();
 
-    if (error) return res.status(500).json({ success: false, message: 'Failed to create company.' });
+    if (error) return res.status(500).json({ success: false, message: 'Failed to create company in database.' });
     res.json({ success: true, message: 'Company provisioned successfully!', company: data });
 });
 
@@ -88,7 +93,7 @@ app.post('/api/super-alpha/users', async (req, res) => {
 
     const { data, error } = await supabase
         .from('users')
-        .insert([{ company_id: company_id || null, name, email, password_hash, role, department: department || 'General' }])
+        .insert([{ company_id: company_id ? parseInt(company_id) : null, name, email, password_hash, role, department: department || 'General' }])
         .select()
         .single();
 
@@ -104,7 +109,7 @@ app.put('/api/super-alpha/users/:id', async (req, res) => {
         return res.status(403).json({ success: false, message: 'Cannot assign Super-Alpha-Admin role.' });
     }
 
-    const updateData = { name, email, role, department, company_id: company_id || null };
+    const updateData = { name, email, role, department, company_id: company_id ? parseInt(company_id) : null };
     if (password_hash && password_hash.trim() !== '') {
         updateData.password_hash = password_hash;
     }
