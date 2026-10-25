@@ -32,13 +32,13 @@ app.get('/api/super-alpha/companies', async (req, res) => {
 });
 
 app.post('/api/super-alpha/companies', async (req, res) => {
-    const { company_name, industry, max_users, contact_person, contact_phone, contact_email, admin_email, admin_password } = req.body;
+    const { company_name, industry, max_users, contact_person, contact_phone, admin_email, admin_password } = req.body;
     
     if (!company_name || !admin_email || !admin_password) {
         return res.status(400).json({ success: false, message: 'Company name, admin email, and password are required.' });
     }
 
-    // A. Insert Company Profile
+    // A. Insert Company Profile (Using admin_email as the unified contact email)
     const { data: compData, error: compError } = await supabase
         .from('companies')
         .insert([{ 
@@ -48,7 +48,7 @@ app.post('/api/super-alpha/companies', async (req, res) => {
             logo_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(company_name),
             contact_person: contact_person || 'N/A',
             contact_phone: contact_phone || 'N/A',
-            contact_email: contact_email || admin_email,
+            contact_email: admin_email,
             company_size: `Max Limit: ${max_users || 100}`,
             status: 'Active' 
         }])
@@ -56,7 +56,7 @@ app.post('/api/super-alpha/companies', async (req, res) => {
         .single();
 
     if (compError) {
-        return res.status(500).json({ success: false, message: 'Failed to create company in database: ' + compError.message });
+        return res.status(500).json({ success: false, message: 'Failed to create company: ' + compError.message });
     }
 
     // B. Automatically Create the Company Head (Admin)
@@ -72,7 +72,7 @@ app.post('/api/super-alpha/companies', async (req, res) => {
         }]);
 
     if (userError) {
-        return res.status(500).json({ success: false, message: 'Company created, but failed to create Company Head profile: ' + userError.message });
+        return res.status(500).json({ success: false, message: 'Company created, but failed to create Company Head user: ' + userError.message });
     }
 
     res.json({ success: true, message: `Enterprise '${company_name}' and Company Head successfully provisioned!`, company: compData });
@@ -80,11 +80,11 @@ app.post('/api/super-alpha/companies', async (req, res) => {
 
 app.put('/api/super-alpha/companies/:id', async (req, res) => {
     const { id } = req.params;
-    const { company_name, industry, max_users, contact_person, contact_phone, contact_email, company_size, status } = req.body;
+    const { company_name, industry, max_users, contact_person, contact_phone, contact_email, status } = req.body;
     
     const { error } = await supabase
         .from('companies')
-        .update({ company_name, industry, max_users: max_users ? parseInt(max_users) : 100, contact_person, contact_phone, contact_email, company_size, status })
+        .update({ company_name, industry, max_users: max_users ? parseInt(max_users) : 100, contact_person, contact_phone, contact_email, status })
         .eq('id', id);
 
     if (error) return res.status(500).json({ success: false, message: 'Failed to update company profile.' });
