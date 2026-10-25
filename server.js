@@ -1,114 +1,120 @@
 const express = require('express');
 const path = require('path');
+const mysql = require('mysql2');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Enterprise and User database simulation
-let enterprises = [
-    { id: 1, company_name: 'Apex Manufacturing Corp', industry: 'Automotive Parts', status: 'Active' }
-];
+// Database Connection using Hostinger/Environment variables
+const db = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'onteam_db',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
-let superAlphaMaster = {
-    email: 'alpha@onteam.com',
-    pinCode: '7777'
-};
-
-// Company users across the 4 lower tiers
-let companyUsers = [
-    { id: 2, company_id: 1, name: 'John Boss', email: 'admin@apex.com', password: 'password123', role: 'Company-Super-Admin', department: 'Executive' },
-    { id: 3, company_id: 1, name: 'Sarah Manager', email: 'dept@apex.com', password: 'password123', role: 'Department-Head', department: 'Assembly' },
-    { id: 4, company_id: 1, name: 'Mike Shift', email: 'shift@apex.com', password: 'password123', role: 'Shift-Head', department: 'Assembly' },
-    { id: 5, company_id: 1, name: 'David Worker', email: 'worker@apex.com', password: 'password123', role: 'Worker', department: 'Assembly' }
-];
-
-// 1. Status Endpoint
+// 1. System Status Endpoint
 app.get('/api/status', (req, res) => {
     res.json({ 
         status: 'online', 
-        message: 'OnTeam Enterprise Security Protocols Active.',
-        aiInsight: 'Tenant isolation and gateway routing operational.'
+        message: 'OnTeam Database-Driven Security Active.',
+        aiInsight: 'All credentials isolated and verified via relational database queries.'
     });
 });
 
-// 2. Super-Alpha Exclusive Login
+// 2. Super-Alpha-Admin Database Authentication
 app.post('/api/super-alpha/login', (req, res) => {
     const { email, pinCode } = req.body;
-    if (email === superAlphaMaster.email && pinCode === superAlphaMaster.pinCode) {
-        res.json({ success: true, token: 'ALPHA_MASTER_TOKEN' });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid master credentials.' });
-    }
-});
-
-// 3. Unified Company User Login (For Company Admin down to Worker)
-app.post('/api/secure/login', (req, res) => {
-    const { email, password } = req.body;
-    const user = companyUsers.find(u => u.email === email && u.password === password);
-
-    if (!user) {
-        return res.status(401).json({ success: false, message: 'Invalid corporate credentials.' });
+    if (!email || !pinCode) {
+        return res.status(400).json({ success: false, message: 'Email and PIN required.' });
     }
 
-    res.json({
-        success: true,
-        message: `Welcome, ${user.name}`,
-        user: {
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            department: user.department
+    const query = `SELECT * FROM users WHERE email = ? AND password_hash = ? AND role = 'Super-Alpha-Admin'`;
+    db.query(query, [email, pinCode], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(401).json({ success: false, message: 'Invalid master credentials.' });
         }
+        res.json({ success: true, token: 'ALPHA_DB_SECURE_TOKEN' });
     });
 });
 
-// 4. Super-Alpha Enterprise Management APIs
+// 3. Unified Corporate Login (Database Verified for all 4 lower tiers)
+app.post('/api/secure/login', (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: 'Email and password required.' });
+    }
+
+    const query = `SELECT * FROM users WHERE email = ? AND password_hash = ? AND role != 'Super-Alpha-Admin'`;
+    db.query(query, [email, password], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(401).json({ success: false, message: 'Invalid corporate credentials or unauthorized access.' });
+        }
+
+        const user = results[0];
+        res.json({
+            success: true,
+            message: `Welcome, ${user.name}`,
+            user: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                department: user.department
+            }
+        });
+    });
+});
+
+// 4. Super-Alpha Enterprise & Admin Provisioning (Stored in DB)
 app.get('/api/super-alpha/enterprises', (req, res) => {
-    res.json({ success: true, enterprises });
+    db.query(`SELECT * FROM companies`, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Database error' });
+        res.json({ success: true, enterprises: results });
+    });
 });
 
 app.post('/api/super-alpha/enterprises', (req, res) => {
-    const { company_name, industry, adminEmail } = req.body;
-    if (!company_name || !adminEmail) {
-        return res.status(400).json({ success: false, message: 'Company name and Admin email required.' });
+    const { company_name, industry, adminEmail, adminPassword } = req.body;
+    if (!company_name || !adminEmail || !adminPassword) {
+        return res.status(400).json({ success: false, message: 'Company name, Admin email, and Password are required.' });
     }
 
-    const newEnt = { id: enterprises.length + 1, company_name, industry: industry || 'General', status: 'Active' };
-    enterprises.push(newEnt);
+    // Insert Company
+    db.query(`INSERT INTO companies (company_name, industry) VALUES (?, ?)`, [company_name, industry || 'General'], (err, compResult) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to create company.' });
+        
+        const companyId = compResult.insertId;
 
-    // Automatically create the Company Super Admin account for this new tenant
-    companyUsers.push({
-        id: companyUsers.length + 1,
-        company_id: newEnt.id,
-        name: `${company_name} Admin`,
-        email: adminEmail,
-        password: 'password123', // Default initial password
-        role: 'Company-Super-Admin',
-        department: 'Executive'
+        // Automatically create the initial Company-Super-Admin in DB
+        db.query(
+            `INSERT INTO users (company_id, name, email, password_hash, role, department) VALUES (?, ?, ?, ?, 'Company-Super-Admin', 'Executive')`,
+            [companyId, `${company_name} Admin`, adminEmail, adminPassword],
+            (userErr) => {
+                if (userErr) return res.status(500).json({ success: false, message: 'Company created, but failed to provision Super Admin account.' });
+                res.json({ success: true, message: `Enterprise '${company_name}' and Super Admin successfully provisioned in DB!` });
+            }
+        );
     });
-
-    res.json({ success: true, message: `Enterprise '${company_name}' provisioned successfully!`, enterprise: newEnt });
 });
 
 // --- Route Mappings ---
-
-// Unified Secure Login Gateway for all company personnel
 app.get('/secure/login/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
 });
 
-// Hidden Super-Alpha Gateway
 app.get('/super-alpha-admin-panel/login/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'super-alpha-login.html'));
 });
 
-// Base public redirect or landing
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`OnTeam Server running on port ${PORT}`);
+    console.log(`OnTeam Database-Driven Server running on port ${PORT}`);
 });
