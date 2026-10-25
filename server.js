@@ -24,7 +24,7 @@ app.post('/api/super-alpha/login', async (req, res) => {
     res.json({ success: true, token: 'ALPHA_SECURE_TOKEN', adminName: data.name });
 });
 
-// 2. Companies CRUD
+// 2. Companies CRUD with Expanded Profile Fields
 app.get('/api/super-alpha/companies', async (req, res) => {
     const { data, error } = await supabase.from('companies').select('*').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching companies' });
@@ -32,15 +32,38 @@ app.get('/api/super-alpha/companies', async (req, res) => {
 });
 
 app.post('/api/super-alpha/companies', async (req, res) => {
-    const { company_name, industry, max_users } = req.body;
+    const { company_name, industry, max_users, logo_url, contact_person, contact_phone, contact_email, company_size } = req.body;
     const { data, error } = await supabase
         .from('companies')
-        .insert([{ company_name, industry: industry || 'General', max_users: max_users || 100, status: 'Active' }])
+        .insert([{ 
+            company_name, 
+            industry: industry || 'General', 
+            max_users: max_users || 100, 
+            logo_url: logo_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(company_name),
+            contact_person: contact_person || 'N/A',
+            contact_phone: contact_phone || 'N/A',
+            contact_email: contact_email || 'N/A',
+            company_size: company_size || '1-50',
+            status: 'Active' 
+        }])
         .select()
         .single();
 
     if (error) return res.status(500).json({ success: false, message: 'Failed to create company.' });
     res.json({ success: true, message: 'Company provisioned successfully!', company: data });
+});
+
+app.put('/api/super-alpha/companies/:id', async (req, res) => {
+    const { id } = req.params;
+    const { company_name, industry, max_users, logo_url, contact_person, contact_phone, contact_email, company_size, status } = req.body;
+    
+    const { error } = await supabase
+        .from('companies')
+        .update({ company_name, industry, max_users, logo_url, contact_person, contact_phone, contact_email, company_size, status })
+        .eq('id', id);
+
+    if (error) return res.status(500).json({ success: false, message: 'Failed to update company profile.' });
+    res.json({ success: true, message: 'Company profile updated successfully!' });
 });
 
 app.delete('/api/super-alpha/companies/:id', async (req, res) => {
@@ -50,7 +73,7 @@ app.delete('/api/super-alpha/companies/:id', async (req, res) => {
     res.json({ success: true, message: 'Company deleted successfully.' });
 });
 
-// 3. Users CRUD (Including password_hash visibility for Super-Alpha)
+// 3. Users CRUD
 app.get('/api/super-alpha/users', async (req, res) => {
     const { data, error } = await supabase.from('users').select('id, company_id, name, email, password_hash, role, department, created_at').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching users' });
@@ -59,7 +82,6 @@ app.get('/api/super-alpha/users', async (req, res) => {
 
 app.post('/api/super-alpha/users', async (req, res) => {
     const { company_id, name, email, password_hash, role, department } = req.body;
-    
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Super-Alpha-Admin can only be seeded via database.' });
     }
@@ -87,11 +109,7 @@ app.put('/api/super-alpha/users/:id', async (req, res) => {
         updateData.password_hash = password_hash;
     }
 
-    const { error } = await supabase
-        .from('users')
-        .update(updateData)
-        .eq('id', id);
-
+    const { error } = await supabase.from('users').update(updateData).eq('id', id);
     if (error) return res.status(500).json({ success: false, message: 'Failed to update user.' });
     res.json({ success: true, message: 'User updated successfully!' });
 });
