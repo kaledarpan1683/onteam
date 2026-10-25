@@ -24,7 +24,7 @@ app.post('/api/super-alpha/login', async (req, res) => {
     res.json({ success: true, token: 'ALPHA_SECURE_TOKEN', adminName: data.name });
 });
 
-// 2. Companies CRUD with Unified Limits & Profile Fields
+// 2. Companies CRUD + Automatic Company Head (Admin) Creation
 app.get('/api/super-alpha/companies', async (req, res) => {
     const { data, error } = await supabase.from('companies').select('*').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching companies' });
@@ -32,39 +32,59 @@ app.get('/api/super-alpha/companies', async (req, res) => {
 });
 
 app.post('/api/super-alpha/companies', async (req, res) => {
-    const { company_name, industry, max_users, logo_url, contact_person, contact_phone, contact_email, company_size } = req.body;
+    const { company_name, industry, max_users, contact_person, contact_phone, contact_email, admin_email, admin_password } = req.body;
     
-    if (!company_name) {
-        return res.status(400).json({ success: false, message: 'Company name is required.' });
+    if (!company_name || !admin_email || !admin_password) {
+        return res.status(400).json({ success: false, message: 'Company name, admin email, and password are required.' });
     }
 
-    const { data, error } = await supabase
+    // A. Insert Company Profile
+    const { data: compData, error: compError } = await supabase
         .from('companies')
         .insert([{ 
             company_name, 
             industry: industry || 'General', 
-            max_users: max_users || 100, 
-            logo_url: logo_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(company_name),
+            max_users: max_users ? parseInt(max_users) : 100, 
+            logo_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(company_name),
             contact_person: contact_person || 'N/A',
             contact_phone: contact_phone || 'N/A',
-            contact_email: contact_email || 'N/A',
-            company_size: company_size || '1-50 Employees (Limit: 100)',
+            contact_email: contact_email || admin_email,
+            company_size: `Max Limit: ${max_users || 100}`,
             status: 'Active' 
         }])
         .select()
         .single();
 
-    if (error) return res.status(500).json({ success: false, message: 'Failed to create company in database.' });
-    res.json({ success: true, message: 'Company provisioned successfully!', company: data });
+    if (compError) {
+        return res.status(500).json({ success: false, message: 'Failed to create company in database: ' + compError.message });
+    }
+
+    // B. Automatically Create the Company Head (Admin)
+    const { error: userError } = await supabase
+        .from('users')
+        .insert([{
+            company_id: compData.id,
+            name: contact_person !== 'N/A' ? contact_person : `${company_name} Head`,
+            email: admin_email,
+            password_hash: admin_password,
+            role: 'Admin',
+            department: 'Executive'
+        }]);
+
+    if (userError) {
+        return res.status(500).json({ success: false, message: 'Company created, but failed to create Company Head profile: ' + userError.message });
+    }
+
+    res.json({ success: true, message: `Enterprise '${company_name}' and Company Head successfully provisioned!`, company: compData });
 });
 
 app.put('/api/super-alpha/companies/:id', async (req, res) => {
     const { id } = req.params;
-    const { company_name, industry, max_users, logo_url, contact_person, contact_phone, contact_email, company_size, status } = req.body;
+    const { company_name, industry, max_users, contact_person, contact_phone, contact_email, company_size, status } = req.body;
     
     const { error } = await supabase
         .from('companies')
-        .update({ company_name, industry, max_users, logo_url, contact_person, contact_phone, contact_email, company_size, status })
+        .update({ company_name, industry, max_users: max_users ? parseInt(max_users) : 100, contact_person, contact_phone, contact_email, company_size, status })
         .eq('id', id);
 
     if (error) return res.status(500).json({ success: false, message: 'Failed to update company profile.' });
