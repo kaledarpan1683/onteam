@@ -127,11 +127,12 @@
                     </div>
                 </div>
 
-                <!-- Super Admins Section -->
+                <!-- Super Admins Section (Split into Super-Admin & Admin sections) -->
                 <div id="tab-super-admins" class="hidden space-y-6">
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                        <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🛡️ Super-Admin & Company Head Management</h3>
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                        <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🛡️ Administrative Hierarchy Management</h3>
                         
+                        <!-- Create / Edit User Form -->
                         <div class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                             <input id="edit-user-id" type="hidden">
                             <div class="grid grid-cols-2 gap-2">
@@ -153,12 +154,22 @@
                                 <input id="user-comp-id" type="number" placeholder="Company ID (Required for Admin)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
                             <div class="flex space-x-2">
-                                <button onclick="saveUser()" id="user-submit-btn" class="flex-grow py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Create Admin Account</button>
+                                <button onclick="saveUser()" id="user-submit-btn" class="flex-grow py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Save Admin Account</button>
                                 <button onclick="resetUserForm()" id="user-cancel-btn" class="hidden px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold">Cancel</button>
                             </div>
                         </div>
 
-                        <div id="super-admins-list" class="space-y-2 text-xs max-h-80 overflow-y-auto"></div>
+                        <!-- Section 1: Super-Admins -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">1. Super-Admins List</h4>
+                            <div id="super-admins-filter-list" class="space-y-2 text-xs max-h-48 overflow-y-auto"></div>
+                        </div>
+
+                        <!-- Section 2: Admins (Company Heads) -->
+                        <div class="space-y-3 border-t border-slate-200 dark:border-slate-800 pt-4">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">2. Admins (Company Heads) List</h4>
+                            <div id="company-admins-filter-list" class="space-y-2 text-xs max-h-48 overflow-y-auto"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -170,28 +181,24 @@
                             <button onclick="toggleCompanyForm()" class="px-3 py-1.5 bg-[#a16836] text-white rounded-lg text-xs font-semibold">+ New Company</button>
                         </div>
 
-                        <!-- New Company Form -->
+                        <!-- New Company Form with Unified Max Limit & Admin Credentials -->
                         <div id="company-form-box" class="hidden space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">New Company Profile</h4>
+                            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">New Company Profile & Initial Company Head Account</h4>
                             <div class="grid grid-cols-2 gap-2">
                                 <input id="new-comp-name" type="text" placeholder="Company Name" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                                 <input id="new-comp-industry" type="text" placeholder="Industry Sector" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
                             <div class="grid grid-cols-3 gap-2">
-                                <input id="new-comp-person" type="text" placeholder="Auth Person (Head)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="new-comp-person" type="text" placeholder="Auth Person (Head Name)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                                 <input id="new-comp-phone" type="text" placeholder="Contact Number" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                                 <input id="new-comp-email" type="email" placeholder="Contact Email" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <select id="new-comp-size" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-                                    <option value="1-50 Employees (Limit: 50)">1-50 Employees (Limit: 50)</option>
-                                    <option value="51-200 Employees (Limit: 200)">51-200 Employees (Limit: 200)</option>
-                                    <option value="201-500 Employees (Limit: 500)">201-500 Employees (Limit: 500)</option>
-                                    <option value="500+ Enterprise (Limit: 2000)">500+ Enterprise (Limit: 2000)</option>
-                                </select>
-                                <input id="new-comp-limit" type="number" placeholder="Max User Limit Override" value="100" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                            <div class="grid grid-cols-3 gap-2">
+                                <input id="new-admin-email" type="email" placeholder="Admin (Company Head) Mail Id" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="new-admin-pass" type="password" placeholder="Admin Password" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="new-comp-limit" type="number" placeholder="Max User Limit" value="100" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
-                            <button onclick="createCompany()" class="w-full py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Save Company Profile</button>
+                            <button onclick="createCompany()" class="w-full py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Save Company & Create Head Profile</button>
                         </div>
 
                         <!-- Companies Grid Cards -->
@@ -262,18 +269,9 @@
                         <input id="modal-email" type="email" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 gap-3">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Company Size & Limit</label>
-                        <select id="modal-size" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-                            <option value="1-50 Employees (Limit: 50)">1-50 Employees (Limit: 50)</option>
-                            <option value="51-200 Employees (Limit: 200)">51-200 Employees (Limit: 200)</option>
-                            <option value="201-500 Employees (Limit: 500)">201-500 Employees (Limit: 500)</option>
-                            <option value="500+ Enterprise (Limit: 2000)">500+ Enterprise (Limit: 2000)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Max User Limit Override</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Max User Limit</label>
                         <input id="modal-limit" type="number" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                     </div>
                 </div>
@@ -374,7 +372,7 @@
                             <img src="${c.logo_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + c.company_name}" class="w-12 h-12 rounded-xl object-cover bg-slate-100">
                             <div>
                                 <h4 class="font-bold text-slate-900 dark:text-white text-sm">${c.company_name} <span class="text-[10px] text-slate-400 font-mono">(ID: ${c.id})</span></h4>
-                                <span class="text-[10px] text-slate-500">${c.industry} • ${c.company_size || '1-50'}</span>
+                                <span class="text-[10px] text-slate-500">${c.industry}</span>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -398,20 +396,23 @@
             const contact_person = document.getElementById('new-comp-person').value;
             const contact_phone = document.getElementById('new-comp-phone').value;
             const contact_email = document.getElementById('new-comp-email').value;
-            const company_size = document.getElementById('new-comp-size').value;
+            const admin_email = document.getElementById('new-admin-email').value;
+            const admin_password = document.getElementById('new-admin-pass').value;
             const max_users = document.getElementById('new-comp-limit').value;
 
-            if (!company_name) return alert('Enter company name.');
+            if (!company_name || !admin_email || !admin_password) return alert('Enter company name, admin email, and admin password.');
 
             const res = await fetch('/api/super-alpha/companies', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ company_name, industry, contact_person, contact_phone, contact_email, company_size, max_users })
+                body: JSON.stringify({ company_name, industry, contact_person, contact_phone, contact_email, admin_email, admin_password, max_users })
             });
             const data = await res.json();
             if (data.success) {
                 alert(data.message);
                 document.getElementById('new-comp-name').value = '';
+                document.getElementById('new-admin-email').value = '';
+                document.getElementById('new-admin-pass').value = '';
                 toggleCompanyForm();
                 loadDashboardData();
             } else { alert(data.message); }
@@ -432,7 +433,6 @@
             document.getElementById('modal-person').value = c.contact_person || '';
             document.getElementById('modal-phone').value = c.contact_phone || '';
             document.getElementById('modal-email').value = c.contact_email || '';
-            document.getElementById('modal-size').value = c.company_size || '1-50 Employees (Limit: 50)';
             document.getElementById('modal-limit').value = c.max_users || 100;
             document.getElementById('modal-comp-logo').src = c.logo_url;
             document.getElementById('modal-comp-title').innerText = `${c.company_name} (ID: ${c.id})`;
@@ -472,13 +472,12 @@
             const contact_person = document.getElementById('modal-person').value;
             const contact_phone = document.getElementById('modal-phone').value;
             const contact_email = document.getElementById('modal-email').value;
-            const company_size = document.getElementById('modal-size').value;
             const max_users = document.getElementById('modal-limit').value;
 
             const res = await fetch(`/api/super-alpha/companies/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ company_name, industry, contact_person, contact_phone, contact_email, company_size, max_users })
+                body: JSON.stringify({ company_name, industry, contact_person, contact_phone, contact_email, max_users })
             });
             const data = await res.json();
             if (data.success) {
@@ -493,11 +492,14 @@
             const data = await res.json();
             allUsersCache = data.users;
             document.getElementById('stat-user-count').innerText = data.users.length;
-            const list = document.getElementById('super-admins-list');
-            list.innerHTML = '';
             
-            data.users.filter(u => u.role === 'Super-Admin' || u.role === 'Admin').forEach(u => {
-                list.innerHTML += `
+            const saList = document.getElementById('super-admins-filter-list');
+            const adminList = document.getElementById('company-admins-filter-list');
+            saList.innerHTML = '';
+            adminList.innerHTML = '';
+            
+            data.users.forEach(u => {
+                const userCard = `
                     <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xs">
                         <div>
                             <div class="font-bold text-slate-900 dark:text-white">${u.name} <span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[#a16836]">${u.role}</span></div>
@@ -505,10 +507,16 @@
                         </div>
                         <div class="flex space-x-3">
                             <button onclick="editUser(${u.id})" class="text-indigo-500 hover:underline font-medium">Edit</button>
-                            <button onclick="deleteUser(${u.id})" class="text-rose-500 hover:underline font-medium">Delete</button>
+                            ${u.role !== 'Super-Alpha-Admin' ? `<button onclick="deleteUser(${u.id})" class="text-rose-500 hover:underline font-medium">Delete</button>` : ''}
                         </div>
                     </div>
                 `;
+
+                if (u.role === 'Super-Admin' || u.role === 'Super-Alpha-Admin') {
+                    saList.innerHTML += userCard;
+                } else if (u.role === 'Admin') {
+                    adminList.innerHTML += userCard;
+                }
             });
         }
 
@@ -568,7 +576,7 @@
             document.getElementById('user-pass').value = '';
             document.getElementById('user-dept').value = '';
             document.getElementById('user-comp-id').value = '';
-            document.getElementById('user-submit-btn').innerText = 'Create Admin Account';
+            document.getElementById('user-submit-btn').innerText = 'Save Admin Account';
             document.getElementById('user-cancel-btn').classList.add('hidden');
         }
 
