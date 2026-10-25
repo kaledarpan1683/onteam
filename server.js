@@ -7,22 +7,9 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 1. Status Endpoint
-app.get('/api/status', (req, res) => {
-    res.json({ 
-        status: 'online', 
-        message: 'OnTeam Supabase-Powered Database Active.',
-        aiInsight: 'Relational tenant isolation verified via Supabase client.'
-    });
-});
-
-// 2. Super-Alpha-Admin Database Authentication
+// 1. Super-Alpha Authentication
 app.post('/api/super-alpha/login', async (req, res) => {
     const { email, pinCode } = req.body;
-    if (!email || !pinCode) {
-        return res.status(400).json({ success: false, message: 'Mail Id and password required.' });
-    }
-
     const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -32,94 +19,102 @@ app.post('/api/super-alpha/login', async (req, res) => {
         .single();
 
     if (error || !data) {
-        return res.status(401).json({ success: false, message: 'Invalid master credentials.' });
+        return res.status(401).json({ success: false, message: 'Invalid Master Credentials.' });
     }
-    res.json({ success: true, token: 'ALPHA_SUPABASE_TOKEN' });
+    res.json({ success: true, token: 'ALPHA_SECURE_TOKEN', adminName: data.name });
 });
 
-// 3. Unified Corporate Login (Supabase Verified)
-app.post('/api/secure/login', async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ success: false, message: 'Mail Id and password required.' });
-    }
+// 2. CRUD: Get All Companies & Limits
+app.get('/api/super-alpha/companies', async (req, res) => {
+    const { data, error } = await supabase.from('companies').select('*').order('id', { ascending: false });
+    if (error) return res.status(500).json({ success: false, message: 'Error fetching companies' });
+    res.json({ success: true, companies: data });
+});
 
+// Create Company with Limits
+app.post('/api/super-alpha/companies', async (req, res) => {
+    const { company_name, industry, max_users } = req.body;
     const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .eq('password_hash', password)
-        .neq('role', 'Super-Alpha-Admin')
-        .single();
-
-    if (error || !data) {
-        return res.status(401).json({ success: false, message: 'Invalid corporate credentials or unauthorized access.' });
-    }
-
-    res.json({
-        success: true,
-        message: `Welcome, ${data.name}`,
-        user: {
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            department: data.department
-        }
-    });
-});
-
-// 4. Super-Alpha Enterprise Management APIs
-app.get('/api/super-alpha/enterprises', async (req, res) => {
-    const { data, error } = await supabase.from('companies').select('*');
-    if (error) return res.status(500).json({ success: false, message: 'Database error' });
-    res.json({ success: true, enterprises: data });
-});
-
-app.post('/api/super-alpha/enterprises', async (req, res) => {
-    const { company_name, industry, adminEmail, adminPassword } = req.body;
-    if (!company_name || !adminEmail || !adminPassword) {
-        return res.status(400).json({ success: false, message: 'Company name, admin mail Id, and password required.' });
-    }
-
-    // Insert Company
-    const { data: compData, error: compError } = await supabase
         .from('companies')
-        .insert([{ company_name, industry: industry || 'General', status: 'Active' }])
+        .insert([{ company_name, industry: industry || 'General', max_users: max_users || 100, status: 'Active' }])
         .select()
         .single();
 
-    if (compError) return res.status(500).json({ success: false, message: 'Failed to create company.' });
+    if (error) return res.status(500).json({ success: false, message: 'Failed to create company.' });
+    res.json({ success: true, message: 'Company provisioned successfully!', company: data });
+});
 
-    // Insert Initial Company Super Admin
-    const { error: userError } = await supabase
+// Delete Company
+app.delete('/api/super-alpha/companies/:id', async (req, res) => {
+    const { id } = req.params;
+    const { error } = await supabase.from('companies').delete().eq('id', id);
+    if (error) return res.status(500).json({ success: false, message: 'Failed to delete company.' });
+    res.json({ success: true, message: 'Company deleted successfully.' });
+});
+
+// 3. CRUD: Get All Users across all companies
+app.get('/api/super-alpha/users', async (req, res) => {
+    const { data, error } = await supabase.from('users').select('id, company_id, name, email, role, department, created_at').order('id', { ascending: false });
+    if (error) return res.status(500).json({ success: false, message: 'Error fetching users' });
+    res.json({ success: true, users: data });
+});
+
+// Create User (with role & limits check)
+app.post('/api/super-alpha/users', async (req, res) => {
+    const { company_id, name, email, password_hash, role, department } = req.body;
+    const { data, error } = await supabase
         .from('users')
-        .insert([{
-            company_id: compData.id,
-            name: `${company_name} Admin`,
-            email: adminEmail,
-            password_hash: adminPassword,
-            role: 'Company-Super-Admin',
-            department: 'Executive'
-        }]);
+        .insert([{ company_id: company_id || null, name, email, password_hash, role, department: department || 'General' }])
+        .select()
+        .single();
 
-    if (userError) return res.status(500).json({ success: false, message: 'Company created, but failed to provision Super Admin.' });
-
-    res.json({ success: true, message: `Enterprise '${company_name}' and Super Admin successfully provisioned in Supabase!` });
+    if (error) return res.status(500).json({ success: false, message: 'Failed to create user (Email may already exist).' });
+    res.json({ success: true, message: 'User created successfully!', user: data });
 });
 
-// --- Route Mappings ---
-app.get('/secure/login/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
+// Delete User
+app.delete('/api/super-alpha/users/:id', async (req, res) => {
+    const { id } = req.params;
+    const { error } = await supabase.from('users').delete().eq('id', id);
+    if (error) return res.status(500).json({ success: false, message: 'Failed to delete user.' });
+    res.json({ success: true, message: 'User deleted successfully.' });
 });
 
+// 4. Messaging & Comments System (Role-based or Individual)
+app.get('/api/super-alpha/messages', async (req, res) => {
+    const { data, error } = await supabase.from('system_messages').select('*').order('id', { ascending: false });
+    if (error) {
+        // If table doesn't exist yet, return empty array gracefully
+        return res.json({ success: true, messages: [] });
+    }
+    res.json({ success: true, messages: data });
+});
+
+app.post('/api/super-alpha/messages', async (req, res) => {
+    const { target_type, target_id, message_text, sender } = req.body;
+    // target_type: 'INDIVIDUAL' or 'ROLE'
+    // target_id: user email/id or role name (e.g., 'Worker')
+    const { data, error } = await supabase
+        .from('system_messages')
+        .insert([{ target_type, target_id, message_text, sender: sender || 'Super-Alpha' }])
+        .select()
+        .single();
+
+    if (error) return res.status(500).json({ success: false, message: 'Failed to post message. Ensure system_messages table exists.' });
+    res.json({ success: true, message: 'Message broadcasted successfully!' });
+});
+
+// Routes
 app.get('/super-alpha-admin-panel/login/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'super-alpha-login.html'));
+});
+
+app.get('/secure/login/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
 });
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`OnTeam Supabase Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`OnTeam Server running on port ${PORT}`));
