@@ -7,6 +7,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Regex Validation Helpers
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^\+?[1-9]\d{1,14}$/; // E.164 international standard format (with country code)
+
 // 1. Super-Alpha Authentication
 app.post('/api/super-alpha/login', async (req, res) => {
     const { email, pinCode } = req.body;
@@ -24,7 +28,7 @@ app.post('/api/super-alpha/login', async (req, res) => {
     res.json({ success: true, token: 'ALPHA_SECURE_TOKEN', adminName: data.name });
 });
 
-// 2. Companies CRUD + Automatic Company Head (Admin) Creation
+// 2. Companies CRUD with Format Validation
 app.get('/api/super-alpha/companies', async (req, res) => {
     const { data, error } = await supabase.from('companies').select('*').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching companies' });
@@ -35,10 +39,18 @@ app.post('/api/super-alpha/companies', async (req, res) => {
     const { company_name, industry, max_users, contact_person, contact_phone, admin_email, admin_password } = req.body;
     
     if (!company_name || !admin_email || !admin_password) {
-        return res.status(400).json({ success: false, message: 'Company name, admin email, and password are required.' });
+        return res.status(400).json({ success: false, message: 'Company name, login email, and password are required.' });
     }
 
-    // A. Insert Company Profile (Using admin_email as the unified contact email)
+    if (!emailRegex.test(admin_email)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format for Company Head.' });
+    }
+
+    if (contact_phone && !phoneRegex.test(contact_phone)) {
+        return res.status(400).json({ success: false, message: 'Invalid phone format. Please include country code (e.g., +919876543210).' });
+    }
+
+    // A. Insert Company Profile
     const { data: compData, error: compError } = await supabase
         .from('companies')
         .insert([{ 
@@ -47,7 +59,7 @@ app.post('/api/super-alpha/companies', async (req, res) => {
             max_users: max_users ? parseInt(max_users) : 100, 
             logo_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=' + encodeURIComponent(company_name),
             contact_person: contact_person || 'N/A',
-            contact_phone: contact_phone || 'N/A',
+            contact_phone: contact_phone || '+10000000000',
             contact_email: admin_email,
             company_size: `Max Limit: ${max_users || 100}`,
             status: 'Active' 
@@ -59,7 +71,7 @@ app.post('/api/super-alpha/companies', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Failed to create company: ' + compError.message });
     }
 
-    // B. Automatically Create the Company Head (Admin)
+    // B. Automatically Create Company Head (Admin)
     const { error: userError } = await supabase
         .from('users')
         .insert([{
@@ -82,6 +94,13 @@ app.put('/api/super-alpha/companies/:id', async (req, res) => {
     const { id } = req.params;
     const { company_name, industry, max_users, contact_person, contact_phone, contact_email, status } = req.body;
     
+    if (contact_email && !emailRegex.test(contact_email)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format.' });
+    }
+    if (contact_phone && !phoneRegex.test(contact_phone)) {
+        return res.status(400).json({ success: false, message: 'Invalid phone format (include country code e.g. +91...).' });
+    }
+
     const { error } = await supabase
         .from('companies')
         .update({ company_name, industry, max_users: max_users ? parseInt(max_users) : 100, contact_person, contact_phone, contact_email, status })
@@ -98,7 +117,7 @@ app.delete('/api/super-alpha/companies/:id', async (req, res) => {
     res.json({ success: true, message: 'Company deleted successfully.' });
 });
 
-// 3. Users CRUD
+// 3. Users CRUD with Format Validation
 app.get('/api/super-alpha/users', async (req, res) => {
     const { data, error } = await supabase.from('users').select('id, company_id, name, email, password_hash, role, department, created_at').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching users' });
@@ -109,6 +128,9 @@ app.post('/api/super-alpha/users', async (req, res) => {
     const { company_id, name, email, password_hash, role, department } = req.body;
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Super-Alpha-Admin can only be seeded via database.' });
+    }
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format.' });
     }
 
     const { data, error } = await supabase
@@ -127,6 +149,9 @@ app.put('/api/super-alpha/users/:id', async (req, res) => {
 
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Cannot assign Super-Alpha-Admin role.' });
+    }
+    if (email && !emailRegex.test(email)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format.' });
     }
 
     const updateData = { name, email, role, department, company_id: company_id ? parseInt(company_id) : null };
