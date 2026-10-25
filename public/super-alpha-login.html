@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnTeam | Super-Alpha-Admin Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col justify-between transition-colors">
+
+    <!-- Header -->
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-xs">
+        <div class="flex items-center space-x-3">
+            <div class="bg-rose-600 text-white px-3.5 py-1.5 rounded-xl font-bold tracking-tight text-sm shadow-md shadow-rose-600/20">🛡️ Super-Alpha Control</div>
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline border-l border-slate-300 dark:border-slate-800 pl-3">Restricted Global Gateway</span>
+        </div>
+        <a href="/" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">← Back to Public Portal</a>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow p-6 flex items-center justify-center">
+        <div class="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
+            
+            <!-- Login View -->
+            <div id="login-view">
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Alpha Master Authentication</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter global master credentials to access tenant provisioning.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Master Email</label>
+                        <input id="alpha-email" type="email" value="alpha@onteam.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Master Security PIN / Key</label>
+                        <input id="alpha-pin" type="password" value="7777" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                    </div>
+                    <button onclick="authenticateAlpha()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl transition text-sm shadow-md shadow-rose-600/20">Authenticate Master Access</button>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard View (Hidden Initially) -->
+            <div id="dashboard-view" class="hidden space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Enterprise Provisioning</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Create new company accounts and assign their Company Super Admins.</p>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+                    <h3 class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Register New Tenant</h3>
+                    <input id="new-comp" type="text" placeholder="Company Name (e.g. Omega Logistics)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                    <input id="new-industry" type="text" placeholder="Industry (e.g. Supply Chain)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                    <input id="new-admin-email" type="email" placeholder="Company Super Admin Email" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                    <button onclick="provisionEnterprise()" class="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-lg transition text-xs">Provision Company & Admin</button>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Active Tenants List</h3>
+                    <div id="tenants-list" class="space-y-2 max-h-48 overflow-y-auto text-xs">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="w-full py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-xl transition text-xs">Lock & Logout</button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center py-4 text-xs text-slate-500">
+        OnTeam Secure Gateway &copy; 2026
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        async function authenticateAlpha() {
+            const email = document.getElementById('alpha-email').value;
+            const pinCode = document.getElementById('alpha-pin').value;
+
+            try {
+                const res = await fetch('/api/super-alpha/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, pinCode })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('login-view').classList.add('hidden');
+                    document.getElementById('dashboard-view').classList.remove('hidden');
+                    loadEnterprises();
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Authentication failed.');
+            }
+        }
+
+        async function loadEnterprises() {
+            try {
+                const res = await fetch('/api/super-alpha/enterprises');
+                const data = await res.json();
+                const listDiv = document.getElementById('tenants-list');
+                listDiv.innerHTML = '';
+
+                data.enterprises.forEach(ent => {
+                    listDiv.innerHTML += `
+                        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                            <div>
+                                <div class="font-bold text-slate-900 dark:text-white">${ent.company_name}</div>
+                                <div class="text-[10px] text-slate-500">Admin: ${ent.superAdminEmail}</div>
+                            </div>
+                            <span class="bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded text-[10px] font-semibold">${ent.status}</span>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error('Error loading tenants');
+            }
+        }
+
+        async function provisionEnterprise() {
+            const company_name = document.getElementById('new-comp').value;
+            const industry = document.getElementById('new-industry').value;
+            const superAdminEmail = document.getElementById('new-admin-email').value;
+
+            if (!company_name || !superAdminEmail) return alert('Fill in company name and admin email.');
+
+            try {
+                const res = await fetch('/api/super-alpha/enterprises', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ company_name, industry, superAdminEmail })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById('new-comp').value = '';
+                    document.getElementById('new-industry').value = '';
+                    document.getElementById('new-admin-email').value = '';
+                    loadEnterprises();
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Provisioning failed.');
+            }
+        }
+    </script>
+</body>
+</html>
