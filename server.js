@@ -6,68 +6,109 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// In-memory store for simulation (will map cleanly to MySQL via Hostinger later)
-let simulatedCompanies = [
+// Enterprise and User database simulation
+let enterprises = [
     { id: 1, company_name: 'Apex Manufacturing Corp', industry: 'Automotive Parts', status: 'Active' }
 ];
 
-let simulatedUsers = [
-    { id: 1, company_id: 1, name: 'Master Alpha', email: 'alpha@onteam.com', role: 'Super-Alpha-Admin', department: 'Global' },
-    { id: 2, company_id: 1, name: 'John Boss', email: 'admin@apex.com', role: 'Company-Super-Admin', department: 'Executive' },
-    { id: 3, company_id: 1, name: 'Sarah Manager', email: 'dept@apex.com', role: 'Department-Head', department: 'Assembly' },
-    { id: 4, company_id: 1, name: 'Mike Shift', email: 'shift@apex.com', role: 'Shift-Head', department: 'Assembly' },
-    { id: 5, company_id: 1, name: 'David Worker', email: 'worker@apex.com', role: 'Worker', department: 'Assembly' }
+let superAlphaMaster = {
+    email: 'alpha@onteam.com',
+    pinCode: '7777'
+};
+
+// Company users across the 4 lower tiers
+let companyUsers = [
+    { id: 2, company_id: 1, name: 'John Boss', email: 'admin@apex.com', password: 'password123', role: 'Company-Super-Admin', department: 'Executive' },
+    { id: 3, company_id: 1, name: 'Sarah Manager', email: 'dept@apex.com', password: 'password123', role: 'Department-Head', department: 'Assembly' },
+    { id: 4, company_id: 1, name: 'Mike Shift', email: 'shift@apex.com', password: 'password123', role: 'Shift-Head', department: 'Assembly' },
+    { id: 5, company_id: 1, name: 'David Worker', email: 'worker@apex.com', password: 'password123', role: 'Worker', department: 'Assembly' }
 ];
 
-// 1. System Health & Status Endpoint
+// 1. Status Endpoint
 app.get('/api/status', (req, res) => {
     res.json({ 
         status: 'online', 
-        message: 'OnTeam Secure ERP Backend is active.',
-        hierarchyLevels: ['Super-Alpha-Admin', 'Company-Super-Admin', 'Department-Head', 'Shift-Head', 'Worker'],
-        aiInsight: 'Security protocols active. Multi-tenant isolation verified.'
+        message: 'OnTeam Enterprise Security Protocols Active.',
+        aiInsight: 'Tenant isolation and gateway routing operational.'
     });
 });
 
-// 2. Authentication Mock Endpoint (Logs in based on selected role)
-app.post('/api/login', (req, res) => {
-    const { email } = req.body;
-    const user = simulatedUsers.find(u => u.email === email);
-    
+// 2. Super-Alpha Exclusive Login
+app.post('/api/super-alpha/login', (req, res) => {
+    const { email, pinCode } = req.body;
+    if (email === superAlphaMaster.email && pinCode === superAlphaMaster.pinCode) {
+        res.json({ success: true, token: 'ALPHA_MASTER_TOKEN' });
+    } else {
+        res.status(401).json({ success: false, message: 'Invalid master credentials.' });
+    }
+});
+
+// 3. Unified Company User Login (For Company Admin down to Worker)
+app.post('/api/secure/login', (req, res) => {
+    const { email, password } = req.body;
+    const user = companyUsers.find(u => u.email === email && u.password === password);
+
     if (!user) {
-        return res.status(401).json({ success: false, message: 'Invalid credentials or user not found.' });
+        return res.status(401).json({ success: false, message: 'Invalid corporate credentials.' });
     }
 
     res.json({
         success: true,
-        message: `Welcome back, ${user.name}!`,
-        user: user
+        message: `Welcome, ${user.name}`,
+        user: {
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            department: user.department
+        }
     });
 });
 
-// 3. Super-Alpha-Admin: Create Company Endpoint
-app.post('/api/companies', (req, res) => {
-    const { company_name, industry } = req.body;
-    if (!company_name) {
-        return res.status(400).json({ success: false, message: 'Company name is required.' });
-    }
-
-    const newCompany = {
-        id: simulatedCompanies.length + 1,
-        company_name,
-        industry: industry || 'General Manufacturing',
-        status: 'Active'
-    };
-
-    simulatedCompanies.push(newCompany);
-    res.json({ success: true, message: `Company '${company_name}' successfully created!`, company: newCompany });
+// 4. Super-Alpha Enterprise Management APIs
+app.get('/api/super-alpha/enterprises', (req, res) => {
+    res.json({ success: true, enterprises });
 });
 
-// 4. Get Company List
-app.get('/api/companies', (req, res) => {
-    res.json({ success: true, companies: simulatedCompanies });
+app.post('/api/super-alpha/enterprises', (req, res) => {
+    const { company_name, industry, adminEmail } = req.body;
+    if (!company_name || !adminEmail) {
+        return res.status(400).json({ success: false, message: 'Company name and Admin email required.' });
+    }
+
+    const newEnt = { id: enterprises.length + 1, company_name, industry: industry || 'General', status: 'Active' };
+    enterprises.push(newEnt);
+
+    // Automatically create the Company Super Admin account for this new tenant
+    companyUsers.push({
+        id: companyUsers.length + 1,
+        company_id: newEnt.id,
+        name: `${company_name} Admin`,
+        email: adminEmail,
+        password: 'password123', // Default initial password
+        role: 'Company-Super-Admin',
+        department: 'Executive'
+    });
+
+    res.json({ success: true, message: `Enterprise '${company_name}' provisioned successfully!`, enterprise: newEnt });
+});
+
+// --- Route Mappings ---
+
+// Unified Secure Login Gateway for all company personnel
+app.get('/secure/login/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
+});
+
+// Hidden Super-Alpha Gateway
+app.get('/super-alpha-admin-panel/login/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'super-alpha-login.html'));
+});
+
+// Base public redirect or landing
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`OnTeam Server is running on port ${PORT}`);
+    console.log(`OnTeam Server running on port ${PORT}`);
 });
