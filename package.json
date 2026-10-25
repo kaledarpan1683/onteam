@@ -1,12 +1,13 @@
 {
-  "name": "OnTeam",
+  "name": "onteam",
   "version": "1.0.0",
-  "description": "AI-Powered Production, Employee & Machine Management ERP",
+  "description": "Secure Enterprise ERP System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "mysql2": "^3.9.2"
   }
 }
