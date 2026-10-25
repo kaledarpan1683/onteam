@@ -127,7 +127,7 @@
                     </div>
                 </div>
 
-                <!-- Super Admins Section (Strictly Super-Admin & Admin/Company Head) -->
+                <!-- Super Admins Section -->
                 <div id="tab-super-admins" class="hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                         <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🛡️ Super-Admin & Company Head Management</h3>
@@ -150,7 +150,7 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <input id="user-dept" type="text" placeholder="Department / Executive" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-                                <input id="user-comp-id" type="number" placeholder="Company ID (if Admin)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="user-comp-id" type="number" placeholder="Company ID (Required for Admin)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
                             <div class="flex space-x-2">
                                 <button onclick="saveUser()" id="user-submit-btn" class="flex-grow py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Create Admin Account</button>
@@ -162,15 +162,15 @@
                     </div>
                 </div>
 
-                <!-- Companies Section (Cards & Detailed Modal View) -->
+                <!-- Companies Section -->
                 <div id="tab-companies" class="hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🏢 Enterprise Companies Profiles Directory</h3>
-                            <button onclick="toggleCompanyForm()" class="px-3 py-1.5 bg-[#a16836] text-white rounded-lg text-xs font-semibold">+ Provision New Company</button>
+                            <button onclick="toggleCompanyForm()" class="px-3 py-1.5 bg-[#a16836] text-white rounded-lg text-xs font-semibold">+ New Company</button>
                         </div>
 
-                        <!-- Hidden/Toggleable New Company Form -->
+                        <!-- New Company Form -->
                         <div id="company-form-box" class="hidden space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                             <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">New Company Profile</h4>
                             <div class="grid grid-cols-2 gap-2">
@@ -184,12 +184,12 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <select id="new-comp-size" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-                                    <option value="1-50">1-50 Employees</option>
-                                    <option value="51-200">51-200 Employees</option>
-                                    <option value="201-500">201-500 Employees</option>
-                                    <option value="500+">500+ Enterprise</option>
+                                    <option value="1-50 Employees (Limit: 50)">1-50 Employees (Limit: 50)</option>
+                                    <option value="51-200 Employees (Limit: 200)">51-200 Employees (Limit: 200)</option>
+                                    <option value="201-500 Employees (Limit: 500)">201-500 Employees (Limit: 500)</option>
+                                    <option value="500+ Enterprise (Limit: 2000)">500+ Enterprise (Limit: 2000)</option>
                                 </select>
-                                <input id="new-comp-limit" type="number" placeholder="User Limit" value="100" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <input id="new-comp-limit" type="number" placeholder="Max User Limit Override" value="100" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
                             <button onclick="createCompany()" class="w-full py-2 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Save Company Profile</button>
                         </div>
@@ -264,23 +264,23 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Company Size</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Company Size & Limit</label>
                         <select id="modal-size" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-                            <option value="1-50">1-50 Employees</option>
-                            <option value="51-200">51-200 Employees</option>
-                            <option value="201-500">201-500 Employees</option>
-                            <option value="500+">500+ Enterprise</option>
+                            <option value="1-50 Employees (Limit: 50)">1-50 Employees (Limit: 50)</option>
+                            <option value="51-200 Employees (Limit: 200)">51-200 Employees (Limit: 200)</option>
+                            <option value="201-500 Employees (Limit: 500)">201-500 Employees (Limit: 500)</option>
+                            <option value="500+ Enterprise (Limit: 2000)">500+ Enterprise (Limit: 2000)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Max User Limit</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Max User Limit Override</label>
                         <input id="modal-limit" type="number" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                     </div>
                 </div>
                 <button onclick="updateCompanyProfile()" class="w-full py-2 bg-[#a16836] text-white font-semibold rounded-lg text-xs">Save Company Profile Updates</button>
             </div>
 
-            <!-- Nested Users Breakdown for this Company -->
+            <!-- Nested Users Breakdown -->
             <div class="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Assigned Personnel & Roles in Company</h4>
                 <div id="modal-company-users" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
@@ -352,8 +352,8 @@
         }
 
         async function loadDashboardData() {
-            loadCompanies();
-            loadUsers();
+            await loadCompanies();
+            await loadUsers();
             loadMessages();
         }
 
@@ -373,15 +373,15 @@
                         <div class="flex items-center space-x-3">
                             <img src="${c.logo_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + c.company_name}" class="w-12 h-12 rounded-xl object-cover bg-slate-100">
                             <div>
-                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">${c.company_name}</h4>
-                                <span class="text-[10px] text-slate-500">${c.industry} • Size: ${c.company_size || '1-50'}</span>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">${c.company_name} <span class="text-[10px] text-slate-400 font-mono">(ID: ${c.id})</span></h4>
+                                <span class="text-[10px] text-slate-500">${c.industry} • ${c.company_size || '1-50'}</span>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                             <div><strong class="text-slate-400">Auth Person:</strong> ${c.contact_person || 'N/A'}</div>
                             <div><strong class="text-slate-400">Phone:</strong> ${c.contact_phone || 'N/A'}</div>
                             <div class="col-span-2 truncate"><strong class="text-slate-400">Email:</strong> ${c.contact_email || 'N/A'}</div>
-                            <div><strong class="text-slate-400">Personnel:</strong> ${compUsers.length} Users</div>
+                            <div><strong class="text-slate-400">Personnel:</strong> ${compUsers.length} Users (Limit: ${c.max_users})</div>
                         </div>
                         <div class="flex justify-between items-center pt-2">
                             <button onclick="openCompanyModal(${c.id})" class="px-3 py-1.5 bg-[#a16836]/10 text-[#a16836] font-semibold rounded-lg text-xs hover:bg-[#a16836]/20 transition">View More & Edit</button>
@@ -413,14 +413,14 @@
                 alert(data.message);
                 document.getElementById('new-comp-name').value = '';
                 toggleCompanyForm();
-                loadCompanies();
+                loadDashboardData();
             } else { alert(data.message); }
         }
 
         async function deleteCompany(id) {
             if (!confirm('Delete this company and its associations?')) return;
             await fetch(`/api/super-alpha/companies/${id}`, { method: 'DELETE' });
-            loadCompanies();
+            loadDashboardData();
         }
 
         function openCompanyModal(id) {
@@ -432,13 +432,12 @@
             document.getElementById('modal-person').value = c.contact_person || '';
             document.getElementById('modal-phone').value = c.contact_phone || '';
             document.getElementById('modal-email').value = c.contact_email || '';
-            document.getElementById('modal-size').value = c.company_size || '1-50';
+            document.getElementById('modal-size').value = c.company_size || '1-50 Employees (Limit: 50)';
             document.getElementById('modal-limit').value = c.max_users || 100;
             document.getElementById('modal-comp-logo').src = c.logo_url;
-            document.getElementById('modal-comp-title').innerText = c.company_name;
+            document.getElementById('modal-comp-title').innerText = `${c.company_name} (ID: ${c.id})`;
             document.getElementById('modal-comp-sector').innerText = c.industry;
 
-            // Render users list for this company
             const userList = document.getElementById('modal-company-users');
             userList.innerHTML = '';
             const compUsers = allUsersCache.filter(u => u.company_id === c.id);
@@ -485,7 +484,7 @@
             if (data.success) {
                 alert(data.message);
                 closeCompanyModal();
-                loadCompanies();
+                loadDashboardData();
             } else { alert(data.message); }
         }
 
@@ -497,13 +496,12 @@
             const list = document.getElementById('super-admins-list');
             list.innerHTML = '';
             
-            // Filter strictly for Super-Admin and Admin (Company Head)
             data.users.filter(u => u.role === 'Super-Admin' || u.role === 'Admin').forEach(u => {
                 list.innerHTML += `
                     <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xs">
                         <div>
                             <div class="font-bold text-slate-900 dark:text-white">${u.name} <span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[#a16836]">${u.role}</span></div>
-                            <div class="text-[10px] text-slate-500">${u.email} | Password: <code class="text-[#a16836] font-mono">${u.password_hash}</code> | Comp ID: ${u.company_id || 'Global'}</div>
+                            <div class="text-[10px] text-slate-500">${u.email} | Password: <code class="text-[#a16836] font-mono">${u.password_hash}</code> | Comp ID: <strong class="text-indigo-600">${u.company_id || 'None'}</strong></div>
                         </div>
                         <div class="flex space-x-3">
                             <button onclick="editUser(${u.id})" class="text-indigo-500 hover:underline font-medium">Edit</button>
@@ -538,8 +536,7 @@
             if (data.success) {
                 alert(data.message);
                 resetUserForm();
-                loadUsers();
-                loadCompanies();
+                loadDashboardData();
             } else { alert(data.message); }
         }
 
@@ -578,8 +575,7 @@
         async function deleteUser(id) {
             if (!confirm('Delete this admin?')) return;
             await fetch(`/api/super-alpha/users/${id}`, { method: 'DELETE' });
-            loadUsers();
-            loadCompanies();
+            loadDashboardData();
         }
 
         async function loadMessages() {
