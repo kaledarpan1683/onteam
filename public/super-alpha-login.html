@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnTeam | Super-Alpha-Admin Gateway</title>
+    <title>OnTeam | Super-Alpha Global Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
@@ -12,71 +12,134 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col justify-between transition-colors">
 
-    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-xs">
+    <!-- Header -->
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-xs sticky top-0 z-50">
         <div class="flex items-center space-x-3">
-            <div class="bg-rose-600 text-white px-3.5 py-1.5 rounded-xl font-bold tracking-tight text-sm shadow-md shadow-rose-600/20">🛡️ Super-Alpha Control</div>
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline border-l border-slate-300 dark:border-slate-800 pl-3">Restricted Global Gateway</span>
+            <div class="bg-rose-600 text-white px-3.5 py-1.5 rounded-xl font-bold tracking-tight text-sm shadow-md shadow-rose-600/20">🛡️ Super-Alpha Master Console</div>
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline border-l border-slate-300 dark:border-slate-800 pl-3">Global Enterprise Command</span>
         </div>
-        <a href="/secure/login/" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">← Back to Portal</a>
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium">🌓 Theme</button>
+            <a href="/secure/login/" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Portal</a>
+        </div>
     </header>
 
-    <main class="flex-grow p-6 flex items-center justify-center">
-        <div class="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
-            
-            <div id="login-view">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Alpha Master Authentication</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter global master credentials.</p>
+    <!-- Main Container -->
+    <main class="flex-grow p-6 md:p-8 max-w-7xl mx-auto w-full">
+        
+        <!-- Login View -->
+        <div id="login-view" class="max-w-md mx-auto mt-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-xl">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Master Authentication</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter Super-Alpha credentials.</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Mail Id</label>
+                    <input id="alpha-email" type="email" placeholder="alpha@onteam.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
                 </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Password</label>
+                    <input id="alpha-pin" type="password" placeholder="Password" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
+                </div>
+                <button onclick="authenticateAlpha()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl transition text-sm shadow-md shadow-rose-600/20">Authenticate Master Access</button>
+            </div>
+        </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Mail Id</label>
-                        <input id="alpha-email" type="email" placeholder="mail Id" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Password</label>
-                        <input id="alpha-pin" type="password" placeholder="Password" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
-                    </div>
-                    <button onclick="authenticateAlpha()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl transition text-sm shadow-md shadow-rose-600/20">Authenticate Master Access</button>
+        <!-- Dashboard View (Hidden Initially) -->
+        <div id="dashboard-view" class="hidden space-y-8">
+            
+            <!-- Top Bar & Logout -->
+            <div class="flex justify-between items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-xs">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Welcome, Super-Alpha Admin</h2>
+                    <p class="text-xs text-slate-500">Manage companies, user hierarchies, enrollment limits, and broadcast directives.</p>
                 </div>
+                <button onclick="logout()" class="px-4 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 rounded-xl text-xs font-semibold hover:bg-rose-100 transition">🔒 Sign Out</button>
             </div>
 
-            <div id="dashboard-view" class="hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Enterprise Provisioning</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Create new companies and database credentials for Company Super Admins.</p>
+            <!-- Grid Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- 1. Companies CRUD & Limits -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h3 class="text-sm font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">🏢 Enterprise Tenants & User Limits</h3>
+                    
+                    <div class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <input id="new-comp" type="text" placeholder="Company Name" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="new-industry" type="text" placeholder="Industry Sector" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                            <input id="new-limit" type="number" placeholder="Max User Limit" value="100" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                        </div>
+                        <button onclick="createCompany()" class="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-lg transition text-xs">Provision Enterprise</button>
+                    </div>
+
+                    <div id="companies-list" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
                 </div>
 
-                <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-                    <h3 class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Register New Tenant</h3>
-                    <input id="new-comp" type="text" placeholder="Company Name" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
-                    <input id="new-industry" type="text" placeholder="Industry Sector" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
-                    <input id="new-admin-email" type="email" placeholder="Admin Mail Id" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
-                    <input id="new-admin-pass" type="password" placeholder="Admin Password" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
-                    <button onclick="provisionEnterprise()" class="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-lg transition text-xs">Provision Company & Admin in DB</button>
+                <!-- 2. Users & Hierarchy CRUD -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h3 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">👥 User Hierarchy Management</h3>
+                    
+                    <div class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="user-name" type="text" placeholder="Full Name" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                            <input id="user-email" type="email" placeholder="Mail Id" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="user-pass" type="password" placeholder="Password" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                            <select id="user-role" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <option value="Company-Super-Admin">Company-Super-Admin</option>
+                                <option value="Department-Head">Department-Head</option>
+                                <option value="Shift-Head">Shift-Head</option>
+                                <option value="Worker">Worker</option>
+                                <option value="Super-Alpha-Admin">Super-Alpha-Admin</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="user-dept" type="text" placeholder="Department" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                            <input id="user-comp-id" type="number" placeholder="Company ID (optional)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                        </div>
+                        <button onclick="createUser()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition text-xs">Create User in Hierarchy</button>
+                    </div>
+
+                    <div id="users-list" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
                 </div>
 
-                <div>
-                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Active Tenants Database</h3>
-                    <div id="tenants-list" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
-                </div>
+            </div>
 
-                <button onclick="location.reload()" class="w-full py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-xl transition text-xs">Lock & Logout</button>
+            <!-- 3. Messaging & Comments Center -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">💬 Role & Individual Messaging / Directives</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <select id="msg-type" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                        <option value="ROLE">Target by Role</option>
+                        <option value="INDIVIDUAL">Target Individual (Email/ID)</option>
+                    </select>
+                    <input id="msg-target" type="text" placeholder="Role (e.g. Worker) or Email" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                    <input id="msg-text" type="text" placeholder="Message or audit comment..." class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                </div>
+                <button onclick="postMessage()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition text-xs">Send Direct Directive / Comment</button>
+                
+                <div id="messages-list" class="space-y-2 max-h-40 overflow-y-auto text-xs pt-2"></div>
             </div>
 
         </div>
     </main>
 
     <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center py-4 text-xs text-slate-500">
-        OnTeam Secure Gateway &copy; 2026
+        OnTeam Super-Alpha Console &copy; 2026
     </footer>
 
+    <!-- Script Logic -->
     <script>
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
         async function authenticateAlpha() {
             const email = document.getElementById('alpha-email').value;
             const pinCode = document.getElementById('alpha-pin').value;
-            if (!email || !pinCode) return alert('Please enter mail Id and password.');
+            if (!email || !pinCode) return alert('Enter mail Id and password.');
 
             try {
                 const res = await fetch('/api/super-alpha/login', {
@@ -85,72 +148,147 @@
                     body: JSON.stringify({ email, pinCode })
                 });
                 const data = await res.json();
-
                 if (data.success) {
                     document.getElementById('login-view').classList.add('hidden');
                     document.getElementById('dashboard-view').classList.remove('hidden');
-                    loadEnterprises();
+                    loadDashboardData();
                 } else {
                     alert(data.message);
                 }
-            } catch (err) {
-                alert('Authentication failed.');
-            }
+            } catch (err) { alert('Login error.'); }
         }
 
-        async function loadEnterprises() {
-            try {
-                const res = await fetch('/api/super-alpha/enterprises');
-                const data = await res.json();
-                const listDiv = document.getElementById('tenants-list');
-                listDiv.innerHTML = '';
+        async function loadDashboardData() {
+            loadCompanies();
+            loadUsers();
+            loadMessages();
+        }
 
-                data.enterprises.forEach(ent => {
-                    listDiv.innerHTML += `
-                        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center">
-                            <div>
-                                <div class="font-bold text-slate-900 dark:text-white">${ent.company_name}</div>
-                                <div class="text-[10px] text-slate-500">Sector: ${ent.industry}</div>
-                            </div>
-                            <span class="bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded text-[10px] font-semibold">${ent.status}</span>
+        async function loadCompanies() {
+            const res = await fetch('/api/super-alpha/companies');
+            const data = await res.json();
+            const list = document.getElementById('companies-list');
+            list.innerHTML = '';
+            data.companies.forEach(c => {
+                list.innerHTML += `
+                    <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xs">
+                        <div>
+                            <div class="font-bold text-slate-900 dark:text-white">ID: ${c.id} | ${c.company_name}</div>
+                            <div class="text-[10px] text-slate-500">Sector: ${c.industry} | Max Users: ${c.max_users || 100}</div>
                         </div>
-                    `;
-                });
-            } catch (err) {
-                console.error('Error loading tenants');
-            }
+                        <button onclick="deleteCompany(${c.id})" class="text-rose-500 hover:underline font-medium">Delete</button>
+                    </div>
+                `;
+            });
         }
 
-        async function provisionEnterprise() {
+        async function createCompany() {
             const company_name = document.getElementById('new-comp').value;
             const industry = document.getElementById('new-industry').value;
-            const adminEmail = document.getElementById('new-admin-email').value;
-            const adminPassword = document.getElementById('new-admin-pass').value;
+            const max_users = document.getElementById('new-limit').value;
+            if (!company_name) return alert('Enter company name.');
 
-            if (!company_name || !adminEmail || !adminPassword) return alert('Fill in company name, admin email, and password.');
-
-            try {
-                const res = await fetch('/api/super-alpha/enterprises', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ company_name, industry, adminEmail, adminPassword })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    alert(data.message);
-                    document.getElementById('new-comp').value = '';
-                    document.getElementById('new-industry').value = '';
-                    document.getElementById('new-admin-email').value = '';
-                    document.getElementById('new-admin-pass').value = '';
-                    loadEnterprises();
-                } else {
-                    alert(data.message);
-                }
-            } catch (err) {
-                alert('Provisioning failed.');
-            }
+            const res = await fetch('/api/super-alpha/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ company_name, industry, max_users })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                document.getElementById('new-comp').value = '';
+                document.getElementById('new-industry').value = '';
+                loadCompanies();
+            } else { alert(data.message); }
         }
+
+        async function deleteCompany(id) {
+            if (!confirm('Delete this company?')) return;
+            await fetch(`/api/super-alpha/companies/${id}`, { method: 'DELETE' });
+            loadCompanies();
+        }
+
+        async function loadUsers() {
+            const res = await fetch('/api/super-alpha/users');
+            const data = await res.json();
+            const list = document.getElementById('users-list');
+            list.innerHTML = '';
+            data.users.forEach(u => {
+                list.innerHTML += `
+                    <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xs">
+                        <div>
+                            <div class="font-bold text-slate-900 dark:text-white">${u.name} (${u.role})</div>
+                            <div class="text-[10px] text-slate-500">${u.email} | Dept: ${u.department} | Comp ID: ${u.company_id || 'Global'}</div>
+                        </div>
+                        <button onclick="deleteUser(${u.id})" class="text-rose-500 hover:underline font-medium">Delete</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function createUser() {
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            const password_hash = document.getElementById('user-pass').value;
+            const role = document.getElementById('user-role').value;
+            const department = document.getElementById('user-dept').value;
+            const company_id = document.getElementById('user-comp-id').value || null;
+
+            if (!name || !email || !password_hash) return alert('Fill name, email, and password.');
+
+            const res = await fetch('/api/super-alpha/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password_hash, role, department, company_id })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                loadUsers();
+            } else { alert(data.message); }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Delete this user?')) return;
+            await fetch(`/api/super-alpha/users/${id}`, { method: 'DELETE' });
+            loadUsers();
+        }
+
+        async function loadMessages() {
+            const res = await fetch('/api/super-alpha/messages');
+            const data = await res.json();
+            const list = document.getElementById('messages-list');
+            list.innerHTML = '';
+            data.messages.forEach(m => {
+                list.innerHTML += `
+                    <div class="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
+                        <span class="font-bold text-amber-600">[${m.target_type}: ${m.target_id}]</span> ${m.message_text}
+                    </div>
+                `;
+            });
+        }
+
+        async function postMessage() {
+            const target_type = document.getElementById('msg-type').value;
+            const target_id = document.getElementById('msg-target').value;
+            const message_text = document.getElementById('msg-text').value;
+            if (!target_id || !message_text) return alert('Fill target and message.');
+
+            const res = await fetch('/api/super-alpha/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target_type, target_id, message_text })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                document.getElementById('msg-target').value = '';
+                document.getElementById('msg-text').value = '';
+                loadMessages();
+            } else { alert(data.message); }
+        }
+
+        function logout() { location.reload(); }
     </script>
 </body>
 </html>
