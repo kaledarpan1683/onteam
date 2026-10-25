@@ -6,7 +6,6 @@
     <title>OnTeam | Super-Alpha Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Apply saved theme immediately before render to avoid flash
         if (localStorage.getItem('onteam_theme') === 'dark' || (!localStorage.getItem('onteam_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -27,7 +26,6 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col justify-between transition-colors">
 
-    <!-- Header -->
     <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-xs sticky top-0 z-50">
         <div class="flex items-center space-x-3">
             <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2">
@@ -37,7 +35,6 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="flex-grow flex w-full">
         
         <!-- Login View -->
@@ -53,7 +50,10 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Password</label>
-                    <input id="alpha-pin" type="password" placeholder="Password" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836]">
+                    <div class="relative">
+                        <input id="alpha-pin" type="password" placeholder="Password" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836] pr-10">
+                        <button type="button" onclick="togglePassword('alpha-pin', this)" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs">👁️</button>
+                    </div>
                 </div>
                 <button onclick="authenticateAlpha()" class="w-full py-3 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-xl transition text-sm shadow-md">Authenticate Master Access</button>
             </div>
@@ -62,7 +62,6 @@
         <!-- App Shell Dashboard View -->
         <div id="dashboard-view" class="hidden flex w-full">
             
-            <!-- Sidebar -->
             <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between hidden md:flex">
                 <div class="space-y-6">
                     <div class="font-bold text-xs tracking-wider text-slate-400 uppercase">Navigation</div>
@@ -74,7 +73,6 @@
                     </nav>
                 </div>
 
-                <!-- Sidebar Footer: Theme & Profile Settings -->
                 <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                     <button onclick="toggleTheme()" class="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition">
                         <span>🌓 Theme Mode</span>
@@ -93,7 +91,6 @@
                             <span class="text-slate-400 text-xs">⚙️</span>
                         </div>
 
-                        <!-- Settings Dropdown Menu -->
                         <div id="settings-menu" class="hidden absolute bottom-14 left-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 z-50">
                             <button onclick="openUpdateProfile()" class="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Update Profile</button>
                             <button onclick="logout()" class="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Sign Out</button>
@@ -102,10 +99,8 @@
                 </div>
             </aside>
 
-            <!-- Main Content Area -->
             <div class="flex-grow p-6 md:p-8 space-y-6 overflow-y-auto">
                 
-                <!-- Personalized Welcome Banner (Dismissible) -->
                 <div id="welcome-banner" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xs flex justify-between items-center">
                     <div>
                         <h2 id="welcome-title" class="text-xl font-bold text-slate-900 dark:text-white">Welcome, Master Alpha</h2>
@@ -114,7 +109,6 @@
                     <button onclick="dismissWelcome()" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800">Hide Banner</button>
                 </div>
 
-                <!-- Tab Sections -->
                 <div id="tab-dashboard" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
@@ -132,12 +126,11 @@
                     </div>
                 </div>
 
-                <!-- Super Admins Section (6-Tier Hierarchy Management with Edit) -->
+                <!-- Super Admins Section -->
                 <div id="tab-super-admins" class="hidden space-y-6">
                     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                         <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🛡️ Enterprise Hierarchy Management (6-Tier)</h3>
                         
-                        <!-- Create / Edit User Form -->
                         <div class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                             <input id="edit-user-id" type="hidden">
                             <div class="grid grid-cols-2 gap-2">
@@ -145,7 +138,10 @@
                                 <input id="user-email" type="email" placeholder="Mail Id" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <input id="user-pass" type="password" placeholder="Password" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                                <div class="relative">
+                                    <input id="user-pass" type="password" placeholder="Password" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white pr-8">
+                                    <button type="button" onclick="togglePassword('user-pass', this)" class="absolute right-2.5 top-3 text-slate-400 text-xs">👁️</button>
+                                </div>
                                 <select id="user-role" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                                     <option value="Super-Admin">Super-Admin</option>
                                     <option value="Admin">Admin (Company Head)</option>
@@ -196,7 +192,7 @@
                             <input id="msg-target" type="text" placeholder="Role or Email" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             <input id="msg-text" type="text" placeholder="Directive / comment..." class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                         </div>
-                        <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-xl transition text-xs">Broadcast Directive</button>
+                        <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-lg transition text-xs">Broadcast Directive</button>
                         <div id="messages-list" class="space-y-2 text-xs max-h-60 overflow-y-auto pt-2"></div>
                     </div>
                 </div>
@@ -211,7 +207,6 @@
         let currentUser = {};
         let allUsersCache = [];
 
-        // Theme Initialization & Sidebar Toggle
         function updateThemeLabel() {
             const isDark = document.documentElement.classList.contains('dark');
             document.getElementById('theme-label').innerText = isDark ? 'Dark Mode' : 'Light Mode';
@@ -223,6 +218,17 @@
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('onteam_theme', isDark ? 'dark' : 'light');
             updateThemeLabel();
+        }
+
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerText = '🙈';
+            } else {
+                input.type = 'password';
+                btn.innerText = '👁️';
+            }
         }
 
         function toggleSettingsMenu() {
@@ -333,7 +339,7 @@
                     <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xs">
                         <div>
                             <div class="font-bold text-slate-900 dark:text-white">${u.name} <span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[#a16836]">${u.role}</span></div>
-                            <div class="text-[10px] text-slate-500">${u.email} | Dept: ${u.department || 'N/A'} | Comp ID: ${u.company_id || 'Global'}</div>
+                            <div class="text-[10px] text-slate-500">${u.email} | Password: <code class="text-[#a16836] font-mono">${u.password_hash}</code> | Dept: ${u.department || 'N/A'} | Comp ID: ${u.company_id || 'Global'}</div>
                         </div>
                         <div class="flex space-x-3">
                             <button onclick="editUser(${u.id})" class="text-indigo-500 hover:underline font-medium">Edit</button>
@@ -354,7 +360,6 @@
             const company_id = document.getElementById('user-comp-id').value || null;
 
             if (!name || !email) return alert('Fill name and email.');
-
             if (!editId && !password_hash) return alert('Password required for new user.');
 
             const url = editId ? `/api/super-alpha/users/${editId}` : '/api/super-alpha/users';
@@ -379,7 +384,7 @@
             document.getElementById('edit-user-id').value = u.id;
             document.getElementById('user-name').value = u.name;
             document.getElementById('user-email').value = u.email;
-            document.getElementById('user-pass').value = ''; // keep secure
+            document.getElementById('user-pass').value = u.password_hash || ''; // Pre-fill password for editing visibility
             document.getElementById('user-role').value = u.role;
             document.getElementById('user-dept').value = u.department || '';
             document.getElementById('user-comp-id').value = u.company_id || '';
