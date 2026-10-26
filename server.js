@@ -9,48 +9,54 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Regex Validation Helpers
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phoneRegex = /^\+?[1-9]\d{1,14}$/; // E.164 international standard format (with country code)
+const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
-// 1. Super-Alpha Authentication
-app.post('/api/super-alpha/login', async (req, res) => {
-    const { email, pinCode } = req.body;
+// 1. Unified Authentication Endpoint (Handles all 6 tiers)
+app.post('/api/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: 'Mail Id and password required.' });
+    }
+
     const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('email', email)
-        .eq('password_hash', pinCode)
-        .eq('role', 'Super-Alpha-Admin')
+        .eq('password_hash', password)
         .single();
 
     if (error || !data) {
-        return res.status(401).json({ success: false, message: 'Invalid Master Credentials.' });
+        return res.status(401).json({ success: false, message: 'Invalid credentials or unauthorized access.' });
     }
-    res.json({ success: true, token: 'ALPHA_SECURE_TOKEN', adminName: data.name });
+
+    res.json({
+        success: true,
+        message: `Welcome back, ${data.name}`,
+        user: {
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            department: data.department,
+            company_id: data.company_id
+        }
+    });
 });
 
-// 2. Companies CRUD with Format Validation
-app.get('/api/super-alpha/companies', async (req, res) => {
+// 2. Companies CRUD (Super-Alpha & Super-Admin access)
+app.get('/api/companies', async (req, res) => {
     const { data, error } = await supabase.from('companies').select('*').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching companies' });
     res.json({ success: true, companies: data });
 });
 
-app.post('/api/super-alpha/companies', async (req, res) => {
+app.post('/api/companies', async (req, res) => {
     const { company_name, industry, max_users, contact_person, contact_phone, admin_email, admin_password } = req.body;
     
     if (!company_name || !admin_email || !admin_password) {
-        return res.status(400).json({ success: false, message: 'Company name, login email, and password are required.' });
+        return res.status(400).json({ success: false, message: 'Company name, admin email, and password required.' });
     }
 
-    if (!emailRegex.test(admin_email)) {
-        return res.status(400).json({ success: false, message: 'Invalid email format for Company Head.' });
-    }
-
-    if (contact_phone && !phoneRegex.test(contact_phone)) {
-        return res.status(400).json({ success: false, message: 'Invalid phone format. Please include country code (e.g., +919876543210).' });
-    }
-
-    // A. Insert Company Profile
     const { data: compData, error: compError } = await supabase
         .from('companies')
         .insert([{ 
@@ -67,11 +73,9 @@ app.post('/api/super-alpha/companies', async (req, res) => {
         .select()
         .single();
 
-    if (compError) {
-        return res.status(500).json({ success: false, message: 'Failed to create company: ' + compError.message });
-    }
+    if (compError) return res.status(500).json({ success: false, message: 'Failed to create company: ' + compError.message });
 
-    // B. Automatically Create Company Head (Admin)
+    // Automatically create Company Head (Admin)
     const { error: userError } = await supabase
         .from('users')
         .insert([{
@@ -83,48 +87,46 @@ app.post('/api/super-alpha/companies', async (req, res) => {
             department: 'Executive'
         }]);
 
-    if (userError) {
-        return res.status(500).json({ success: false, message: 'Company created, but failed to create Company Head user: ' + userError.message });
-    }
+    if (userError) return res.status(500).json({ success: false, message: 'Company created, but failed to create admin user.' });
 
-    res.json({ success: true, message: `Enterprise '${company_name}' and Company Head successfully provisioned!`, company: compData });
+    res.json({ success: true, message: `Enterprise '${company_name}' provisioned successfully!`, company: compData });
 });
 
-app.put('/api/super-alpha/companies/:id', async (req, res) => {
+app.put('/api/companies/:id', async (req, res) => {
     const { id } = req.params;
     const { company_name, industry, max_users, contact_person, contact_phone, contact_email, status } = req.body;
     
-    if (contact_email && !emailRegex.test(contact_email)) {
-        return res.status(400).json({ success: false, message: 'Invalid email format.' });
-    }
-    if (contact_phone && !phoneRegex.test(contact_phone)) {
-        return res.status(400).json({ success: false, message: 'Invalid phone format (include country code e.g. +91...).' });
-    }
-
     const { error } = await supabase
         .from('companies')
         .update({ company_name, industry, max_users: max_users ? parseInt(max_users) : 100, contact_person, contact_phone, contact_email, status })
         .eq('id', id);
 
-    if (error) return res.status(500).json({ success: false, message: 'Failed to update company profile.' });
+    if (error) return res.status(500).json({ success: false, message: 'Failed to update company.' });
     res.json({ success: true, message: 'Company profile updated successfully!' });
 });
 
-app.delete('/api/super-alpha/companies/:id', async (req, res) => {
+app.delete('/api/companies/:id', async (req, res) => {
     const { id } = req.params;
     const { error } = await supabase.from('companies').delete().eq('id', id);
     if (error) return res.status(500).json({ success: false, message: 'Failed to delete company.' });
     res.json({ success: true, message: 'Company deleted successfully.' });
 });
 
-// 3. Users CRUD with Format Validation
-app.get('/api/super-alpha/users', async (req, res) => {
-    const { data, error } = await supabase.from('users').select('id, company_id, name, email, password_hash, role, department, created_at').order('id', { ascending: false });
+// 3. Users CRUD
+app.get('/api/users', async (req, res) => {
+    const { company_id } = req.query;
+    let query = supabase.from('users').select('id, company_id, name, email, password_hash, role, department, created_at').order('id', { ascending: false });
+    
+    if (company_id) {
+        query = query.eq('company_id', company_id);
+    }
+
+    const { data, error } = await query;
     if (error) return res.status(500).json({ success: false, message: 'Error fetching users' });
     res.json({ success: true, users: data });
 });
 
-app.post('/api/super-alpha/users', async (req, res) => {
+app.post('/api/users', async (req, res) => {
     const { company_id, name, email, password_hash, role, department } = req.body;
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Super-Alpha-Admin can only be seeded via database.' });
@@ -143,15 +145,12 @@ app.post('/api/super-alpha/users', async (req, res) => {
     res.json({ success: true, message: 'User created successfully!', user: data });
 });
 
-app.put('/api/super-alpha/users/:id', async (req, res) => {
+app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
     const { name, email, password_hash, role, department, company_id } = req.body;
 
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Cannot assign Super-Alpha-Admin role.' });
-    }
-    if (email && !emailRegex.test(email)) {
-        return res.status(400).json({ success: false, message: 'Invalid email format.' });
     }
 
     const updateData = { name, email, role, department, company_id: company_id ? parseInt(company_id) : null };
@@ -164,7 +163,7 @@ app.put('/api/super-alpha/users/:id', async (req, res) => {
     res.json({ success: true, message: 'User updated successfully!' });
 });
 
-app.delete('/api/super-alpha/users/:id', async (req, res) => {
+app.delete('/api/users/:id', async (req, res) => {
     const { id } = req.params;
     const { error } = await supabase.from('users').delete().eq('id', id);
     if (error) return res.status(500).json({ success: false, message: 'Failed to delete user.' });
@@ -172,22 +171,22 @@ app.delete('/api/super-alpha/users/:id', async (req, res) => {
 });
 
 // 4. Messaging System
-app.get('/api/super-alpha/messages', async (req, res) => {
+app.get('/api/messages', async (req, res) => {
     const { data, error } = await supabase.from('system_messages').select('*').order('id', { ascending: false });
     if (error) return res.json({ success: true, messages: [] });
     res.json({ success: true, messages: data });
 });
 
-app.post('/api/super-alpha/messages', async (req, res) => {
+app.post('/api/messages', async (req, res) => {
     const { target_type, target_id, message_text, sender } = req.body;
     const { data, error } = await supabase
         .from('system_messages')
-        .insert([{ target_type, target_id, message_text, sender: sender || 'Super-Alpha' }])
+        .insert([{ target_type, target_id, message_text, sender: sender || 'System' }])
         .select()
         .single();
 
     if (error) return res.status(500).json({ success: false, message: 'Failed to post message.' });
-    res.json({ success: true, message: 'Message broadcasted successfully!' });
+    res.json({ success: true, message: 'Directive broadcasted successfully!' });
 });
 
 // Routes
