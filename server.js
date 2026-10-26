@@ -7,11 +7,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Regex Validation Helpers
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-
-// 1. Unified Authentication Endpoint (Handles all 6 tiers)
+// Unified Authentication Endpoint across all 6 tiers
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -43,7 +39,7 @@ app.post('/api/auth/login', async (req, res) => {
     });
 });
 
-// 2. Companies CRUD (Super-Alpha & Super-Admin access)
+// Companies CRUD
 app.get('/api/companies', async (req, res) => {
     const { data, error } = await supabase.from('companies').select('*').order('id', { ascending: false });
     if (error) return res.status(500).json({ success: false, message: 'Error fetching companies' });
@@ -75,7 +71,6 @@ app.post('/api/companies', async (req, res) => {
 
     if (compError) return res.status(500).json({ success: false, message: 'Failed to create company: ' + compError.message });
 
-    // Automatically create Company Head (Admin)
     const { error: userError } = await supabase
         .from('users')
         .insert([{
@@ -112,14 +107,11 @@ app.delete('/api/companies/:id', async (req, res) => {
     res.json({ success: true, message: 'Company deleted successfully.' });
 });
 
-// 3. Users CRUD
+// Users CRUD
 app.get('/api/users', async (req, res) => {
     const { company_id } = req.query;
     let query = supabase.from('users').select('id, company_id, name, email, password_hash, role, department, created_at').order('id', { ascending: false });
-    
-    if (company_id) {
-        query = query.eq('company_id', company_id);
-    }
+    if (company_id) query = query.eq('company_id', company_id);
 
     const { data, error } = await query;
     if (error) return res.status(500).json({ success: false, message: 'Error fetching users' });
@@ -130,9 +122,6 @@ app.post('/api/users', async (req, res) => {
     const { company_id, name, email, password_hash, role, department } = req.body;
     if (role === 'Super-Alpha-Admin') {
         return res.status(403).json({ success: false, message: 'Super-Alpha-Admin can only be seeded via database.' });
-    }
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ success: false, message: 'Invalid email format.' });
     }
 
     const { data, error } = await supabase
@@ -154,9 +143,7 @@ app.put('/api/users/:id', async (req, res) => {
     }
 
     const updateData = { name, email, role, department, company_id: company_id ? parseInt(company_id) : null };
-    if (password_hash && password_hash.trim() !== '') {
-        updateData.password_hash = password_hash;
-    }
+    if (password_hash && password_hash.trim() !== '') updateData.password_hash = password_hash;
 
     const { error } = await supabase.from('users').update(updateData).eq('id', id);
     if (error) return res.status(500).json({ success: false, message: 'Failed to update user.' });
@@ -170,7 +157,7 @@ app.delete('/api/users/:id', async (req, res) => {
     res.json({ success: true, message: 'User deleted successfully.' });
 });
 
-// 4. Messaging System
+// Messaging System
 app.get('/api/messages', async (req, res) => {
     const { data, error } = await supabase.from('system_messages').select('*').order('id', { ascending: false });
     if (error) return res.json({ success: true, messages: [] });
@@ -189,12 +176,8 @@ app.post('/api/messages', async (req, res) => {
     res.json({ success: true, message: 'Directive broadcasted successfully!' });
 });
 
-// Routes
-app.get('/super-alpha-admin-panel/login/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'super-alpha-login.html'));
-});
-
-app.get('/secure/login/', (req, res) => {
+// Single Unified Login Route
+app.get('/secure-login/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'secure-login.html'));
 });
 
