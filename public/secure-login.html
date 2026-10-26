@@ -476,7 +476,8 @@
 
             data.messages.forEach(m => {
                 const utcString = m.created_at && !m.created_at.endsWith('Z') ? m.created_at + 'Z' : m.created_at;
-                const localTime = m.created_at ? new Date(utcString).toLocaleString(undefined, {
+                // Parse the timestamp as-is without appending 'Z'
+                const localTime = m.created_at ? new Date(m.created_at).toLocaleString(undefined, {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
@@ -484,7 +485,6 @@
                     minute: '2-digit',
                     hour12: true
                 }) : 'Just now';
-
                 const card = `
                     <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1 shadow-xs">
                         <div class="flex justify-between text-[10px] text-slate-400">
