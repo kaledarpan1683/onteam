@@ -202,13 +202,13 @@
                 tabs = [
                     { 
                         id: 'dashboard', 
-                        label: '🏠 Home/dashboard', 
+                        label: '🏠 Home', 
                         html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                                 <h2 class="text-xl font-bold">Welcome, ${user.name}</h2>
                                 <p class="text-xs text-slate-500">Global Master Console active across all enterprise tiers.</p>
                                 
                                 <div id="dashboard-inbox-ticker" class="space-y-2 pt-2">
-                                    <h4 class="text-xs font-bold text-[#a16836] uppercase tracking-wider">📢 Active Announcements & Complaints</h4>
+                                    <h4 class="text-xs font-bold text-[#a16836] uppercase tracking-wider">📢 Active Announcements & Messages</h4>
                                     <div id="ticker-messages" class="space-y-2 max-h-40 overflow-y-auto text-xs"></div>
                                 </div>
 
@@ -475,13 +475,14 @@
             if (ticker) ticker.innerHTML = '';
 
             data.messages.forEach(m => {
-                const localTime = m.created_at ? new Date(m.created_at).toLocaleString(undefined, {
+                const utcString = m.created_at && !m.created_at.endsWith('Z') ? m.created_at + 'Z' : m.created_at;
+                const localTime = m.created_at ? new Date(utcString).toLocaleString(undefined, {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
-                    hour: '2-digit',
+                    hour: 'numeric',
                     minute: '2-digit',
-                    second: '2-digit'
+                    hour12: true
                 }) : 'Just now';
 
                 const card = `
