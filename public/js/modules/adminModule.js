@@ -22,13 +22,19 @@ function renderAdminDashboard(user, containerNav, containerContent) {
                 <div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
                     <h2 class="text-xl font-bold text-slate-900 dark:text-white">Welcome, ${user.name} (Company Head)</h2>
                     <p class="text-xs text-slate-500">Managing Company ID: ${user.company_id} | Highest Corporate Authority</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    
+                    <div id="dashboard-inbox-ticker" class="space-y-2 pt-2">
+                        <h4 class="text-xs font-bold text-[#a16836] uppercase tracking-wider">📢 Company Announcements & Directives</h4>
+                        <div id="ticker-messages" class="space-y-2 max-h-40 overflow-y-auto text-xs"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                         <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
                             <div class="text-xs text-slate-400">Active Departments</div>
                             <div class="text-2xl font-bold text-[#a16836] mt-1">7 Units</div>
                         </div>
                         <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
-                            <div class="text-xs text-slate-400">Department Heads</div>
+                            <div class="text-xs text-slate-400">Company Personnel</div>
                             <div class="text-2xl font-bold text-indigo-600 mt-1">Active</div>
                         </div>
                         <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -96,7 +102,7 @@ function renderAdminDashboard(user, containerNav, containerContent) {
         }
     ];
 
-    // Render Sidebar Navigation & Content Tabs
+    // 3. Render Sidebar Navigation & Content Tabs
     containerNav.innerHTML = '';
     containerContent.innerHTML = '';
 
@@ -110,6 +116,19 @@ function renderAdminDashboard(user, containerNav, containerContent) {
                 ${tab.html}
             </div>`;
     });
+
+    // Also inject "Update Company Detail" action into the settings menu if present
+    const settingsMenu = document.getElementById('settings-menu');
+    if (settingsMenu && !document.getElementById('update-company-btn')) {
+        const updateCompanyBtn = document.createElement('button');
+        updateCompanyBtn.id = 'update-company-btn';
+        updateCompanyBtn.className = 'w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition border-b border-slate-200 dark:border-slate-800';
+        updateCompanyBtn.innerText = '🏢 Update Company Detail';
+        updateCompanyBtn.onclick = () => {
+            if (typeof openCompanyModal === 'function') openCompanyModal(user.company_id);
+        };
+        settingsMenu.insertBefore(updateCompanyBtn, settingsMenu.firstChild);
+    }
 }
 
 function switchAdminTab(tabId) {
@@ -130,12 +149,13 @@ async function postAdminMessage() {
     const res = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target_type, target_id, message_text, sender: currentUser.name })
+        body: JSON.stringify({ target_type, target_id, message_text, sender: currentUser.name, sender_role: currentUser.role })
     });
     const data = await res.json();
     if (data.success) {
         alert(data.message);
         document.getElementById('admin-msg-text').value = '';
+        if (typeof loadMessages === 'function') loadMessages();
     } else {
         alert(data.message);
     }
