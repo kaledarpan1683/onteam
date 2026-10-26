@@ -37,18 +37,16 @@
     </header>
 
     <main class="flex-grow flex w-full">
-        
         <!-- Login View -->
         <div id="login-section" class="max-w-md mx-auto my-auto w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
             <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Corporate Sign In</h1>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sign In to Your Workspace</h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter your organizational credentials.</p>
             </div>
-
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Mail Id</label>
-                    <input id="login-email" type="email" placeholder="name@company.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836]">
+                    <input id="login-email" type="email" placeholder="mail@company.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836]">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Password</label>
@@ -61,18 +59,13 @@
             </div>
         </div>
 
-        <!-- Dynamic Dashboard Shell (Hidden Initially, Persists on Refresh) -->
+        <!-- Dynamic Dashboard Shell -->
         <div id="dashboard-shell" class="hidden flex w-full">
-            
-            <!-- Dynamic Sidebar -->
             <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between hidden md:flex">
                 <div class="space-y-6">
                     <div class="font-bold text-xs tracking-wider text-slate-400 uppercase">Navigation</div>
-                    <nav id="sidebar-nav" class="space-y-1">
-                        <!-- Dynamically populated based on role -->
-                    </nav>
+                    <nav id="sidebar-nav" class="space-y-1"></nav>
                 </div>
-
                 <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                     <div class="relative">
                         <div onclick="toggleSettingsMenu()" class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
@@ -85,22 +78,49 @@
                             </div>
                             <span class="text-slate-400 text-xs">⚙️</span>
                         </div>
-
                         <div id="settings-menu" class="hidden absolute bottom-14 left-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 z-50">
                             <button onclick="logout()" class="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Sign Out</button>
                         </div>
                     </div>
                 </div>
             </aside>
-
-            <!-- Dynamic Content Area -->
-            <div id="main-content-area" class="flex-grow p-6 md:p-8 space-y-6 overflow-y-auto">
-                <!-- Dynamically rendered tabs -->
-            </div>
-
+            <div id="main-content-area" class="flex-grow p-6 md:p-8 space-y-6 overflow-y-auto"></div>
         </div>
-
     </main>
+
+    <!-- Company Detail & Edit Modal -->
+    <div id="company-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div class="flex items-center space-x-3">
+                    <img id="modal-comp-logo" src="" class="w-12 h-12 rounded-xl object-cover bg-slate-100">
+                    <div>
+                        <h3 id="modal-comp-title" class="text-lg font-bold text-slate-900 dark:text-white">Company Profile</h3>
+                        <p id="modal-comp-sector" class="text-xs text-slate-500">Sector</p>
+                    </div>
+                </div>
+                <button onclick="closeCompanyModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+            </div>
+            <div class="space-y-4">
+                <input id="modal-comp-id" type="hidden">
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Company Name</label><input id="modal-name" type="text" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Industry Sector</label><input id="modal-industry" type="text" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Auth Person</label><input id="modal-person" type="text" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Phone</label><input id="modal-phone" type="text" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email</label><input id="modal-email" type="email" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"></div>
+                </div>
+                <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Max User Limit</label><input id="modal-limit" type="number" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"></div>
+                <button onclick="updateCompanyProfile()" class="w-full py-2 bg-[#a16836] text-white font-semibold rounded-lg text-xs">Save Company Updates</button>
+            </div>
+            <div class="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Assigned Personnel</h4>
+                <div id="modal-company-users" class="space-y-2 max-h-48 overflow-y-auto text-xs"></div>
+            </div>
+        </div>
+    </div>
 
     <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center py-4 text-xs text-slate-500">
         OnTeam Secure Enterprise Gateway &copy; 2026
@@ -108,6 +128,8 @@
 
     <script>
         let currentUser = null;
+        let allCompaniesCache = [];
+        let allUsersCache = [];
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         function toggleTheme() {
@@ -123,8 +145,8 @@
         }
 
         function toggleSettingsMenu() { document.getElementById('settings-menu').classList.toggle('hidden'); }
+        function toggleCompanyForm() { document.getElementById('company-form-box').classList.toggle('hidden'); }
 
-        // --- Persistent Session on Refresh ---
         window.addEventListener('DOMContentLoaded', () => {
             const savedSession = localStorage.getItem('onteam_user_session');
             if (savedSession) {
@@ -168,7 +190,6 @@
             buildSidebarAndTabs(user);
         }
 
-        // --- Role-Aware Dynamic Sidebar & Tabs Engine ---
         function buildSidebarAndTabs(user) {
             const nav = document.getElementById('sidebar-nav');
             const content = document.getElementById('main-content-area');
@@ -179,36 +200,91 @@
 
             if (user.role === 'Super-Alpha-Admin') {
                 tabs = [
-                    { id: 'home', label: '🏠 Dashboard', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name} (Super-Alpha)</h2><p class="text-xs text-slate-500 mt-1">Full platform master control active.</p></div>` },
-                    { id: 'companies', label: '🏢 Companies', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4"><h3 class="text-sm font-bold text-[#a16836]">Global Enterprises</h3><div id="dyn-companies" class="space-y-2 text-xs"></div></div>` },
-                    { id: 'messages', label: '💬 Leave a Message', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4"><h3 class="text-sm font-bold text-[#a16836]">System Directives</h3><input id="dyn-msg" type="text" placeholder="Global directive..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"><button onclick="sendGlobalMsg()" class="px-4 py-2 bg-[#a16836] text-white rounded-lg text-xs font-semibold">Broadcast</button></div>` }
-                ];
-            } else if (user.role === 'Admin') {
-                // Company Head
-                tabs = [
-                    { id: 'home', label: '🏠 Company Dashboard', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name} (Company Head)</h2><p class="text-xs text-slate-500 mt-1">Managing Company ID: ${user.company_id}</p></div>` },
-                    { id: 'personnel', label: '👥 Department & Shift Heads', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4"><h3 class="text-sm font-bold text-[#a16836]">Company Personnel</h3><div id="dyn-personnel" class="space-y-2 text-xs"></div></div>` },
-                    { id: 'messages', label: '💬 Messages', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h3 class="text-sm font-bold text-[#a16836]">Company Inbox & Directives</h3><p class="text-xs text-slate-500">Directives from Super-Alpha and management.</p></div>` }
+                    { 
+                        id: 'dashboard', 
+                        label: '🏠 Home/dashboard', 
+                        html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                                <h2 class="text-xl font-bold">Welcome, ${user.name}</h2>
+                                <p class="text-xs text-slate-500">Global Master Console active across all enterprise tiers.</p>
+                                <div class="grid grid-cols-3 gap-4 pt-4">
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800"><div class="text-xs text-slate-400">Total Companies</div><div id="stat-comp" class="text-2xl font-bold text-[#a16836]">0</div></div>
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800"><div class="text-xs text-slate-400">Total Users</div><div id="stat-user" class="text-2xl font-bold text-indigo-600">0</div></div>
+                                    <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800"><div class="text-xs text-slate-400">Security</div><div class="text-2xl font-bold text-emerald-600">Secure</div></div>
+                                </div>
+                               </div>` 
+                    },
+                    { 
+                        id: 'super-admins', 
+                        label: '🛡️ Super admins', 
+                        html: `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                                <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">🛡️ Administrative Hierarchy Management</h3>
+                                <div class="space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <input id="edit-user-id" type="hidden">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input id="user-name" type="text" placeholder="Full Name" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs">
+                                        <input id="user-email" type="email" placeholder="name@domain.com" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input id="user-pass" type="password" placeholder="Password" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs">
+                                        <select id="user-role" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs">
+                                            <option value="Super-Admin">Super-Admin</option>
+                                            <option value="Admin">Admin (Company Head)</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input id="user-dept" type="text" placeholder="Department" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs">
+                                        <input id="user-comp-id" type="number" placeholder="Company ID" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs">
+                                    </div>
+                                    <button onclick="saveUser()" id="user-submit-btn" class="w-full py-2 bg-[#a16836] text-white font-semibold rounded-lg text-xs">Save Admin Account</button>
+                                </div>
+                                <div class="space-y-3"><h4 class="text-xs font-bold text-slate-500 uppercase">Super-Admins List</h4><div id="super-admins-filter-list" class="space-y-2 text-xs max-h-48 overflow-y-auto"></div></div>
+                                <div class="space-y-3 border-t border-slate-200 dark:border-slate-800 pt-4"><h4 class="text-xs font-bold text-slate-500 uppercase">Admins (Company Heads) List</h4><div id="company-admins-filter-list" class="space-y-2 text-xs max-h-48 overflow-y-auto"></div></div>
+                               </div>` 
+                    },
+                    { 
+                        id: 'companies', 
+                        label: '🏢 Companies', 
+                        html: `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                                <div class="flex justify-between items-center"><h3 class="text-sm font-bold text-[#a16836] uppercase">🏢 Enterprise Companies Directory</h3><button onclick="toggleCompanyForm()" class="px-3 py-1.5 bg-[#a16836] text-white rounded-lg text-xs font-semibold">+ New Company</button></div>
+                                <div id="company-form-box" class="hidden space-y-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <div class="grid grid-cols-2 gap-2"><input id="new-comp-name" type="text" placeholder="Company Name" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"><input id="new-comp-industry" type="text" placeholder="Sector" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"></div>
+                                    <div class="grid grid-cols-2 gap-2"><input id="new-comp-person" type="text" placeholder="Auth Person" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"><input id="new-comp-phone" type="text" placeholder="Phone" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"></div>
+                                    <div class="grid grid-cols-3 gap-2"><input id="new-admin-email" type="email" placeholder="Admin Email" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"><input id="new-admin-pass" type="password" placeholder="Password" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"><input id="new-comp-limit" type="number" placeholder="Limit" value="100" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"></div>
+                                    <button onclick="createCompany()" class="w-full py-2 bg-[#a16836] text-white font-semibold rounded-lg text-xs">Save Company & Head</button>
+                                </div>
+                                <div id="companies-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"></div>
+                               </div>` 
+                    },
+                    { 
+                        id: 'messages', 
+                        label: '💬 Leave a message', 
+                        html: `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                                <h3 class="text-sm font-bold text-[#a16836] uppercase">💬 Directives & Audit Comments</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <select id="msg-type" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"><option value="ROLE">Target by Role</option><option value="INDIVIDUAL">Target Individual</option></select>
+                                    <input id="msg-target" type="text" placeholder="Role or Email" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                    <input id="msg-text" type="text" placeholder="Directive message..." class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                </div>
+                                <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] text-white font-semibold rounded-xl text-xs">Broadcast Directive</button>
+                                <div id="messages-list" class="space-y-2 text-xs max-h-60 overflow-y-auto pt-2"></div>
+                               </div>` 
+                    }
                 ];
             } else {
-                // Department-Head, Shift-Head, Worker
                 tabs = [
-                    { id: 'home', label: '🏠 Operational Workspace', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name} (${user.role})</h2><p class="text-xs text-slate-500 mt-1">Department: ${user.department}</p></div>` },
-                    { id: 'tasks', label: '📋 Work Queue & Attendance', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h3 class="text-sm font-bold text-[#a16836]">Daily Performance & Telemetry Scorecard</h3><p class="text-xs text-slate-500 mt-1">Status: Active & Clocked In.</p></div>` },
-                    { id: 'messages', label: '💬 Directives', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h3 class="text-sm font-bold text-[#a16836]">Directives</h3><p class="text-xs text-slate-500">Company announcements and role notifications.</p></div>` }
+                    { id: 'dashboard', label: '🏠 Dashboard', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name}</h2><p class="text-xs text-slate-500 mt-1">Role: ${user.role} | Department: ${user.department}</p></div>` }
                 ];
             }
 
             tabs.forEach((tab, index) => {
-                nav.innerHTML += `<button onclick="switchDynTab('${tab.id}')" id="nav-${tab.id}" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">${tab.label}</button>`;
+                nav.innerHTML += `<button onclick="switchTab('${tab.id}')" id="nav-${tab.id}" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">${tab.label}</button>`;
                 content.innerHTML += `<div id="tab-${tab.id}" class="${index === 0 ? '' : 'hidden'} space-y-6">${tab.html}</div>`;
             });
 
-            if (user.role === 'Super-Alpha-Admin') loadDynCompanies();
-            if (user.role === 'Admin') loadDynPersonnel(user.company_id);
+            if (user.role === 'Super-Alpha-Admin') loadDashboardData();
         }
 
-        function switchDynTab(tabId) {
+        function switchTab(tabId) {
             document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('[id^="nav-"]').forEach(el => {
                 el.className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition";
@@ -217,38 +293,199 @@
             document.getElementById(`nav-${tabId}`).className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[#a16836]/10 text-[#a16836] transition";
         }
 
-        async function loadDynCompanies() {
+        async function loadDashboardData() {
+            await loadCompanies();
+            await loadUsers();
+            loadMessages();
+        }
+
+        async function loadCompanies() {
             const res = await fetch('/api/companies');
             const data = await res.json();
-            const container = document.getElementById('dyn-companies');
-            if (!container) return;
-            container.innerHTML = '';
+            allCompaniesCache = data.companies;
+            if (document.getElementById('stat-comp')) document.getElementById('stat-comp').innerText = data.companies.length;
+            
+            const grid = document.getElementById('companies-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
             data.companies.forEach(c => {
-                container.innerHTML += `<div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between"><div><strong>${c.company_name}</strong> (ID: ${c.id}) - Sector: ${c.industry}</div></div>`;
+                const compUsers = allUsersCache.filter(u => u.company_id === c.id);
+                grid.innerHTML += `
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between">
+                        <div class="flex items-center space-x-3">
+                            <img src="${c.logo_url}" class="w-12 h-12 rounded-xl object-cover bg-slate-100">
+                            <div><h4 class="font-bold text-sm">${c.company_name} <span class="text-[10px] text-slate-400">(ID: ${c.id})</span></h4><span class="text-[10px] text-slate-500">${c.industry}</span></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <div><strong>Auth:</strong> ${c.contact_person}</div><div><strong>Phone:</strong> ${c.contact_phone}</div>
+                            <div class="col-span-2 truncate"><strong>Email:</strong> ${c.contact_email}</div>
+                            <div><strong>Personnel:</strong> ${compUsers.length} Users</div>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <button onclick="openCompanyModal(${c.id})" class="px-3 py-1.5 bg-[#a16836]/10 text-[#a16836] font-semibold rounded-lg text-xs">View & Edit</button>
+                            <button onclick="deleteCompany(${c.id})" class="text-rose-500 text-xs">Delete</button>
+                        </div>
+                    </div>`;
             });
         }
 
-        async function loadDynPersonnel(companyId) {
-            const res = await fetch(`/api/users?company_id=${companyId}`);
-            const data = await res.json();
-            const container = document.getElementById('dyn-personnel');
-            if (!container) return;
-            container.innerHTML = '';
-            data.users.forEach(u => {
-                container.innerHTML += `<div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between"><div><strong>${u.name}</strong> (${u.role}) - Dept: ${u.department}</div></div>`;
-            });
-        }
+        async function createCompany() {
+            const company_name = document.getElementById('new-comp-name').value;
+            const industry = document.getElementById('new-comp-industry').value;
+            const contact_person = document.getElementById('new-comp-person').value;
+            const contact_phone = document.getElementById('new-comp-phone').value;
+            const admin_email = document.getElementById('new-admin-email').value;
+            const admin_password = document.getElementById('new-admin-pass').value;
+            const max_users = document.getElementById('new-comp-limit').value;
 
-        async function sendGlobalMsg() {
-            const text = document.getElementById('dyn-msg').value;
-            if (!text) return alert('Enter message.');
-            await fetch('/api/messages', {
+            if (!company_name || !admin_email || !admin_password) return alert('Fill required fields.');
+            if (!emailRegex.test(admin_email)) return alert('Invalid email format.');
+
+            const res = await fetch('/api/companies', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target_type: 'ROLE', target_id: 'All', message_text: text, sender: currentUser.name })
+                body: JSON.stringify({ company_name, industry, contact_person, contact_phone, admin_email, admin_password, max_users })
             });
-            alert('Directive broadcasted.');
-            document.getElementById('dyn-msg').value = '';
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                toggleCompanyForm();
+                loadDashboardData();
+            } else { alert(data.message); }
+        }
+
+        async function deleteCompany(id) {
+            if (!confirm('Delete company?')) return;
+            await fetch(`/api/companies/${id}`, { method: 'DELETE' });
+            loadDashboardData();
+        }
+
+        async function loadUsers() {
+            const res = await fetch('/api/users');
+            const data = await res.json();
+            allUsersCache = data.users;
+            if (document.getElementById('stat-user')) document.getElementById('stat-user').innerText = data.users.length;
+            
+            const saList = document.getElementById('super-admins-filter-list');
+            const adminList = document.getElementById('company-admins-filter-list');
+            if (!saList || !adminList) return;
+            saList.innerHTML = '';
+            adminList.innerHTML = '';
+            
+            data.users.forEach(u => {
+                const userCard = `
+                    <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg flex justify-between items-center shadow-xs">
+                        <div><div class="font-bold">${u.name} <span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[#a16836]">${u.role}</span></div><div class="text-[10px] text-slate-500">${u.email} | Pass: <code class="text-[#a16836]">${u.password_hash}</code> | Comp: ${u.company_id || 'None'}</div></div>
+                        <div class="flex space-x-3"><button onclick="editUser(${u.id})" class="text-indigo-500 text-xs">Edit</button>${u.role !== 'Super-Alpha-Admin' ? `<button onclick="deleteUser(${u.id})" class="text-rose-500 text-xs">Delete</button>` : ''}</div>
+                    </div>`;
+                if (u.role === 'Super-Admin' || u.role === 'Super-Alpha-Admin') saList.innerHTML += userCard;
+                else if (u.role === 'Admin') adminList.innerHTML += userCard;
+            });
+        }
+
+        async function saveUser() {
+            const editId = document.getElementById('edit-user-id').value;
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            const password_hash = document.getElementById('user-pass').value;
+            const role = document.getElementById('user-role').value;
+            const department = document.getElementById('user-dept').value;
+            const company_id = document.getElementById('user-comp-id').value || null;
+
+            if (!name || !email) return alert('Fill name and email.');
+            if (!emailRegex.test(email)) return alert('Invalid email format.');
+
+            const url = editId ? `/api/users/${editId}` : '/api/users';
+            const res = await fetch(url, {
+                method: editId ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password_hash, role, department, company_id })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                loadDashboardData();
+            } else { alert(data.message); }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Delete user?')) return;
+            await fetch(`/api/users/${id}`, { method: 'DELETE' });
+            loadDashboardData();
+        }
+
+        async function loadMessages() {
+            const res = await fetch('/api/messages');
+            const data = await res.json();
+            const list = document.getElementById('messages-list');
+            if (!list) return;
+            list.innerHTML = '';
+            data.messages.forEach(m => {
+                list.innerHTML += `<div class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"><span class="font-bold text-[#a16836]">[${m.target_type}: ${m.target_id}]</span> ${m.message_text}</div>`;
+            });
+        }
+
+        async function postMessage() {
+            const target_type = document.getElementById('msg-type').value;
+            const target_id = document.getElementById('msg-target').value;
+            const message_text = document.getElementById('msg-text').value;
+            if (!target_id || !message_text) return alert('Fill target and message.');
+
+            const res = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target_type, target_id, message_text, sender: currentUser.name })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                loadMessages();
+            } else { alert(data.message); }
+        }
+
+        function openCompanyModal(id) {
+            const c = allCompaniesCache.find(comp => comp.id === id);
+            if (!c) return;
+            document.getElementById('modal-comp-id').value = c.id;
+            document.getElementById('modal-name').value = c.company_name;
+            document.getElementById('modal-industry').value = c.industry || '';
+            document.getElementById('modal-person').value = c.contact_person || '';
+            document.getElementById('modal-phone').value = c.contact_phone || '';
+            document.getElementById('modal-email').value = c.contact_email || '';
+            document.getElementById('modal-limit').value = c.max_users || 100;
+            document.getElementById('modal-comp-logo').src = c.logo_url;
+            document.getElementById('modal-comp-title').innerText = `${c.company_name} (ID: ${c.id})`;
+            document.getElementById('modal-comp-sector').innerText = c.industry;
+
+            const userList = document.getElementById('modal-company-users');
+            userList.innerHTML = '';
+            allUsersCache.filter(u => u.company_id === c.id).forEach(u => {
+                userList.innerHTML += `<div class="p-2 bg-slate-50 dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-800 flex justify-between"><div>${u.name} (${u.role})</div></div>`;
+            });
+
+            document.getElementById('company-modal').classList.remove('hidden');
+        }
+
+        function closeCompanyModal() { document.getElementById('company-modal').classList.add('hidden'); }
+
+        async function updateCompanyProfile() {
+            const id = document.getElementById('modal-comp-id').value;
+            const company_name = document.getElementById('modal-name').value;
+            const industry = document.getElementById('modal-industry').value;
+            const contact_person = document.getElementById('modal-person').value;
+            const contact_phone = document.getElementById('modal-phone').value;
+            const contact_email = document.getElementById('modal-email').value;
+            const max_users = document.getElementById('modal-limit').value;
+
+            await fetch(`/api/companies/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ company_name, industry, contact_person, contact_phone, contact_email, max_users })
+            });
+            alert('Updated successfully.');
+            closeCompanyModal();
+            loadDashboardData();
         }
 
         function logout() {
