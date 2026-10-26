@@ -89,15 +89,15 @@ function renderAdminDashboard(user, containerNav, containerContent) {
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                     <h3 class="text-sm font-bold text-[#a16836] uppercase tracking-wider">Company Directives & Announcements</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-                        <select id="admin-msg-target" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                        <select id="msg-target-role" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                             <option value="Department-Head">All Department Heads</option>
                             <option value="Shift-Head">All Shift Heads</option>
                             <option value="Worker">All Workers</option>
                         </select>
-                        <input id="admin-msg-text" type="text" placeholder="Type announcement or directive..." class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+                        <input id="msg-text" type="text" placeholder="Type announcement or directive..." class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
                     </div>
-                    <button onclick="postAdminMessage()" class="w-full py-2.5 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-xl text-xs transition">Broadcast Directive</button>
-                    <div id="admin-messages-list" class="space-y-2 text-xs max-h-60 overflow-y-auto pt-2"></div>
+                    <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-xl transition text-xs">Broadcast Directive</button>
+                    <div id="messages-list" class="space-y-2 text-xs max-h-60 overflow-y-auto pt-2"></div>
                 </div>`
         }
     ];
@@ -117,15 +117,15 @@ function renderAdminDashboard(user, containerNav, containerContent) {
             </div>`;
     });
 
-    // Also inject "Update Company Detail" action into the settings menu if present
+    // 4. Inject "Update Company Detail" action into settings menu if present
     const settingsMenu = document.getElementById('settings-menu');
     if (settingsMenu && !document.getElementById('update-company-btn')) {
         const updateCompanyBtn = document.createElement('button');
         updateCompanyBtn.id = 'update-company-btn';
-        updateCompanyBtn.className = 'w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition border-b border-slate-200 dark:border-slate-800';
+        updateCompanyBtn.className = 'w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition border-b border-slate-200 dark:border-slate-800';
         updateCompanyBtn.innerText = '🏢 Update Company Detail';
         updateCompanyBtn.onclick = () => {
-            if (typeof openCompanyModal === 'function') openCompanyModal(user.company_id);
+            alert(`Opening company detail settings for Company ID: ${user.company_id}`);
         };
         settingsMenu.insertBefore(updateCompanyBtn, settingsMenu.firstChild);
     }
@@ -138,25 +138,4 @@ function switchAdminTab(tabId) {
     });
     document.getElementById(`tab-${tabId}`).classList.remove('hidden');
     document.getElementById(`nav-${tabId}`).className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[#a16836]/10 text-[#a16836] transition";
-}
-
-async function postAdminMessage() {
-    const target_type = 'ROLE';
-    const target_id = document.getElementById('admin-msg-target').value;
-    const message_text = document.getElementById('admin-msg-text').value;
-    if (!message_text) return alert('Enter directive message.');
-
-    const res = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target_type, target_id, message_text, sender: currentUser.name, sender_role: currentUser.role })
-    });
-    const data = await res.json();
-    if (data.success) {
-        alert(data.message);
-        document.getElementById('admin-msg-text').value = '';
-        if (typeof loadMessages === 'function') loadMessages();
-    } else {
-        alert(data.message);
-    }
 }
