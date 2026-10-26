@@ -466,7 +466,7 @@
             loadDashboardData();
         }
 
-        aasync function loadMessages() {
+        async function loadMessages() {
             const res = await fetch('/api/messages');
             const data = await res.json();
             
@@ -477,21 +477,12 @@
             if (ticker) ticker.innerHTML = '';
 
             data.messages.forEach(m => {
-                // Automatically formats the ISO UTC timestamp to the user's local browser timezone and format
-                const localTime = m.created_at ? new Date(m.created_at).toLocaleString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                }) : 'Just now';
-
+                const formattedTime = new Date(m.created_at).toLocaleString();
                 const card = `
                     <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1 shadow-xs">
                         <div class="flex justify-between text-[10px] text-slate-400">
                             <span class="font-bold text-[#a16836]">From: ${m.sender} (${m.sender_role}) → Target: ${m.target_id || m.target_type}</span>
-                            <span>🕒 ${localTime}</span>
+                            <span>🕒 ${formattedTime}</span>
                         </div>
                         <p class="text-xs text-slate-800 dark:text-slate-200">${m.message_text}</p>
                     </div>`;
