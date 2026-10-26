@@ -33,7 +33,9 @@ async function loadMessages() {
                 return; 
             }
 
-            const localTime = m.created_at ? new Date(m.created_at).toLocaleString(undefined, {
+            // Ensure JavaScript parses the timestamp correctly as UTC by appending 'Z' if missing
+            const timestampStr = m.created_at && !m.created_at.endsWith('Z') && !m.created_at.includes('+') ? m.created_at + 'Z' : m.created_at;
+            const localTime = m.created_at ? new Date(timestampStr).toLocaleString(undefined, {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
