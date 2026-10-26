@@ -206,6 +206,13 @@
                         html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                                 <h2 class="text-xl font-bold">Welcome, ${user.name}</h2>
                                 <p class="text-xs text-slate-500">Global Master Console active across all enterprise tiers.</p>
+                                
+                                <!-- Announcements / Complaints Ticker -->
+                                <div id="dashboard-inbox-ticker" class="space-y-2 pt-2">
+                                    <h4 class="text-xs font-bold text-[#a16836] uppercase tracking-wider">📢 Active Announcements & Complaints</h4>
+                                    <div id="ticker-messages" class="space-y-2 max-h-40 overflow-y-auto text-xs"></div>
+                                </div>
+
                                 <div class="grid grid-cols-3 gap-4 pt-4">
                                     <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800"><div class="text-xs text-slate-400">Total Companies</div><div id="stat-comp" class="text-2xl font-bold text-[#a16836]">0</div></div>
                                     <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800"><div class="text-xs text-slate-400">Total Users</div><div id="stat-user" class="text-2xl font-bold text-indigo-600">0</div></div>
@@ -259,20 +266,62 @@
                         id: 'messages', 
                         label: '💬 Leave a message', 
                         html: `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                                <h3 class="text-sm font-bold text-[#a16836] uppercase">💬 Directives & Audit Comments</h3>
+                                <h3 class="text-sm font-bold text-[#a16836] uppercase">💬 Announcements & Complaints</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-                                    <select id="msg-type" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs"><option value="ROLE">Target by Role</option><option value="INDIVIDUAL">Target Individual</option></select>
-                                    <input id="msg-target" type="text" placeholder="Role or Email" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
-                                    <input id="msg-text" type="text" placeholder="Directive message..." class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                    <select id="msg-target-role" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                        <option value="All">Broadcast to All Tiers</option>
+                                        <option value="Super-Admin">Super-Admins</option>
+                                        <option value="Admin">Admins (Company Heads)</option>
+                                        <option value="Department-Head">Department Heads</option>
+                                        <option value="Shift-Head">Shift Heads</option>
+                                        <option value="Worker">Workers</option>
+                                    </select>
+                                    <input id="msg-target" type="text" placeholder="Specific Role or Email (Optional)" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                    <input id="msg-text" type="text" placeholder="Announcement / Complaint text..." class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
                                 </div>
-                                <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] text-white font-semibold rounded-xl text-xs">Broadcast Directive</button>
+                                <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] text-white font-semibold rounded-lg text-xs">Send / Broadcast</button>
                                 <div id="messages-list" class="space-y-2 text-xs max-h-60 overflow-y-auto pt-2"></div>
                                </div>` 
                     }
                 ];
             } else {
+                // Lower Tiers (Admin, Dept-Head, Shift-Head, Worker)
                 tabs = [
-                    { id: 'dashboard', label: '🏠 Dashboard', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name}</h2><p class="text-xs text-slate-500 mt-1">Role: ${user.role} | Department: ${user.department}</p></div>` }
+                    { 
+                        id: 'dashboard', 
+                        label: '🏠 Dashboard', 
+                        html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                                <h2 class="text-xl font-bold">Welcome, ${user.name}</h2>
+                                <p class="text-xs text-slate-500 mt-1">Role: ${user.role} | Department: ${user.department}</p>
+                                
+                                <div id="dashboard-inbox-ticker" class="space-y-2 pt-2">
+                                    <h4 class="text-xs font-bold text-[#a16836] uppercase tracking-wider">📢 Announcements & Complaints Inbox</h4>
+                                    <div id="ticker-messages" class="space-y-2 max-h-40 overflow-y-auto text-xs"></div>
+                                </div>
+                               </div>` 
+                    },
+                    { 
+                        id: 'messages', 
+                        label: '💬 Leave a message', 
+                        html: `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                                <h3 class="text-sm font-bold text-[#a16836] uppercase">💬 Announcements & Complaints</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <select id="msg-target-role" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                        ${user.role === 'Admin' ? `
+                                            <option value="Super-Admin">Super-Admin</option>
+                                            <option value="Super-Alpha-Admin">Super-Alpha-Admin</option>
+                                        ` : `
+                                            <option value="Admin">Admin (Company Head)</option>
+                                            <option value="Department-Head">Department Head</option>
+                                        `}
+                                    </select>
+                                    <input id="msg-target" type="text" placeholder="Specific Email (Optional)" class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                    <input id="msg-text" type="text" placeholder="Complaint or query text..." class="bg-white dark:bg-slate-900 border rounded-lg p-2.5 text-xs">
+                                </div>
+                                <button onclick="postMessage()" class="w-full py-2.5 bg-[#a16836] text-white font-semibold rounded-lg text-xs">Send Message</button>
+                                <div id="messages-list" class="space-y-2 text-xs max-h-60 overflow-y-auto pt-2"></div>
+                               </div>` 
+                    }
                 ];
             }
 
@@ -281,7 +330,7 @@
                 content.innerHTML += `<div id="tab-${tab.id}" class="${index === 0 ? '' : 'hidden'} space-y-6">${tab.html}</div>`;
             });
 
-            if (user.role === 'Super-Alpha-Admin') loadDashboardData();
+            loadDashboardData();
         }
 
         function switchTab(tabId) {
@@ -294,8 +343,10 @@
         }
 
         async function loadDashboardData() {
-            await loadCompanies();
-            await loadUsers();
+            if (currentUser.role === 'Super-Alpha-Admin') {
+                await loadCompanies();
+                await loadUsers();
+            }
             loadMessages();
         }
 
@@ -418,28 +469,57 @@
         async function loadMessages() {
             const res = await fetch('/api/messages');
             const data = await res.json();
+            
             const list = document.getElementById('messages-list');
-            if (!list) return;
-            list.innerHTML = '';
+            const ticker = document.getElementById('ticker-messages');
+            
+            if (list) list.innerHTML = '';
+            if (ticker) ticker.innerHTML = '';
+
             data.messages.forEach(m => {
-                list.innerHTML += `<div class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs"><span class="font-bold text-[#a16836]">[${m.target_type}: ${m.target_id}]</span> ${m.message_text}</div>`;
+                const formattedTime = new Date(m.created_at).toLocaleString();
+                const card = `
+                    <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1 shadow-xs">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span class="font-bold text-[#a16836]">From: ${m.sender} (${m.sender_role}) → Target: ${m.target_id || m.target_type}</span>
+                            <span>🕒 ${formattedTime}</span>
+                        </div>
+                        <p class="text-xs text-slate-800 dark:text-slate-200">${m.message_text}</p>
+                    </div>`;
+
+                if (list) list.innerHTML += card;
+                if (ticker && (m.target_type === 'All' || m.target_id === currentUser.role || m.target_id === currentUser.email)) {
+                    ticker.innerHTML += card;
+                }
             });
+
+            if (ticker && ticker.innerHTML === '') {
+                ticker.innerHTML = '<div class="text-slate-400 italic text-xs">No active announcements or complaints.</div>';
+            }
         }
 
         async function postMessage() {
-            const target_type = document.getElementById('msg-type').value;
-            const target_id = document.getElementById('msg-target').value;
+            const target_type = 'ROLE';
+            const target_id = document.getElementById('msg-target-role').value;
             const message_text = document.getElementById('msg-text').value;
-            if (!target_id || !message_text) return alert('Fill target and message.');
+
+            if (!message_text) return alert('Enter message text.');
 
             const res = await fetch('/api/messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target_type, target_id, message_text, sender: currentUser.name })
+                body: JSON.stringify({ 
+                    target_type, 
+                    target_id, 
+                    message_text, 
+                    sender: currentUser.name,
+                    sender_role: currentUser.role 
+                })
             });
             const data = await res.json();
             if (data.success) {
                 alert(data.message);
+                document.getElementById('msg-text').value = '';
                 loadMessages();
             } else { alert(data.message); }
         }
