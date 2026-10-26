@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnTeam | Enterprise Secure Login</title>
+    <title>OnTeam | Enterprise Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         if (localStorage.getItem('onteam_theme') === 'dark' || (!localStorage.getItem('onteam_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -11,56 +11,95 @@
         } else {
             document.documentElement.classList.remove('dark');
         }
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+        tailwind.config = { 
+            darkMode: 'class', 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: { DEFAULT: '#a16836', dark: '#84532b', light: '#b87c4a' } }
+                } 
+            } 
+        }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col justify-between transition-colors">
 
-    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-xs">
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-xs sticky top-0 z-50">
         <div class="flex items-center space-x-3">
-            <div class="bg-[#a16836] text-white px-3.5 py-1.5 rounded-xl font-bold tracking-tight text-sm shadow-md">⚡ OnTeam ERP</div>
-            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline border-l border-slate-300 dark:border-slate-800 pl-3">Corporate Authentication Gateway</span>
+            <span class="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-[#a16836] inline-block"></span>
+                <span>OnTeam ERP</span>
+            </span>
+            <span id="role-header-badge" class="text-[10px] bg-[#a16836]/10 text-[#a16836] px-2 py-0.5 rounded font-mono hidden">Role</span>
         </div>
+        <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium">🌓 Theme</button>
     </header>
 
-    <main class="flex-grow p-6 flex items-center justify-center">
-        <div class="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
-            
-            <div id="login-section">
-                <div class="text-center mb-6">
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sign In to Your Workspace</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter your corporate credentials.</p>
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Mail Id</label>
-                        <input id="login-email" type="email" placeholder="mail@company.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836]">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Password</label>
-                        <div class="relative">
-                            <input id="login-password" type="password" placeholder="Password" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836] pr-10">
-                            <button type="button" onclick="togglePassword('login-password', this)" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs">👁️</button>
-                        </div>
-                    </div>
-                    <button onclick="corporateLogin()" class="w-full py-3 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-xl transition text-sm shadow-md">Secure Login</button>
-                </div>
+    <main class="flex-grow flex w-full">
+        
+        <!-- Login View -->
+        <div id="login-section" class="max-w-md mx-auto my-auto w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Corporate Sign In</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Enter your organizational credentials.</p>
             </div>
 
-            <div id="workspace-section" class="hidden space-y-6">
-                <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4">
-                    <div>
-                        <h2 id="ws-name" class="text-lg font-bold text-slate-900 dark:text-white">User Name</h2>
-                        <span id="ws-role-badge" class="text-[10px] bg-[#a16836]/10 text-[#a16836] px-2 py-0.5 rounded font-mono">Role</span>
-                    </div>
-                    <button onclick="location.reload()" class="text-xs text-rose-500 hover:underline font-medium">Sign Out</button>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Mail Id</label>
+                    <input id="login-email" type="email" placeholder="name@company.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836]">
                 </div>
-                <div id="ws-content" class="text-xs text-slate-600 dark:text-slate-300 space-y-3"></div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Password</label>
+                    <div class="relative">
+                        <input id="login-password" type="password" placeholder="Password" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#a16836] pr-10">
+                        <button type="button" onclick="togglePassword('login-password', this)" class="absolute right-3 top-3.5 text-slate-400 text-xs">👁️</button>
+                    </div>
+                </div>
+                <button onclick="corporateLogin()" class="w-full py-3 bg-[#a16836] hover:bg-[#84532b] text-white font-semibold rounded-xl transition text-sm shadow-md">Secure Login</button>
+            </div>
+        </div>
+
+        <!-- Dynamic Dashboard Shell (Hidden Initially, Persists on Refresh) -->
+        <div id="dashboard-shell" class="hidden flex w-full">
+            
+            <!-- Dynamic Sidebar -->
+            <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between hidden md:flex">
+                <div class="space-y-6">
+                    <div class="font-bold text-xs tracking-wider text-slate-400 uppercase">Navigation</div>
+                    <nav id="sidebar-nav" class="space-y-1">
+                        <!-- Dynamically populated based on role -->
+                    </nav>
+                </div>
+
+                <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <div class="relative">
+                        <div onclick="toggleSettingsMenu()" class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <div class="flex items-center space-x-3">
+                                <div id="user-avatar" class="w-9 h-9 rounded-full bg-[#a16836] text-white flex items-center justify-center font-bold text-xs">U</div>
+                                <div>
+                                    <div id="sidebar-username" class="text-xs font-bold text-slate-900 dark:text-white">User Name</div>
+                                    <div id="sidebar-role" class="text-[10px] text-slate-500">Role</div>
+                                </div>
+                            </div>
+                            <span class="text-slate-400 text-xs">⚙️</span>
+                        </div>
+
+                        <div id="settings-menu" class="hidden absolute bottom-14 left-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 z-50">
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Dynamic Content Area -->
+            <div id="main-content-area" class="flex-grow p-6 md:p-8 space-y-6 overflow-y-auto">
+                <!-- Dynamically rendered tabs -->
             </div>
 
         </div>
+
     </main>
 
     <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center py-4 text-xs text-slate-500">
@@ -68,51 +107,153 @@
     </footer>
 
     <script>
+        let currentUser = null;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('onteam_theme', isDark ? 'dark' : 'light');
+        }
+
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.innerText = '🙈';
-            } else {
-                input.type = 'password';
-                btn.innerText = '👁️';
-            }
+            if (input.type === 'password') { input.type = 'text'; btn.innerText = '🙈'; }
+            else { input.type = 'password'; btn.innerText = '👁️'; }
         }
+
+        function toggleSettingsMenu() { document.getElementById('settings-menu').classList.toggle('hidden'); }
+
+        // --- Persistent Session on Refresh ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('onteam_user_session');
+            if (savedSession) {
+                currentUser = JSON.parse(savedSession);
+                renderDynamicDashboard(currentUser);
+            }
+        });
 
         async function corporateLogin() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            if (!email || !password) return alert('Please enter mail Id and password.');
+            if (!email || !password) return alert('Enter email and password.');
 
             try {
-                const res = await fetch('/api/secure/login', {
+                const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
-
                 if (data.success) {
-                    document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('workspace-section').classList.remove('hidden');
-                    renderUserDashboard(data.user);
+                    currentUser = data.user;
+                    localStorage.setItem('onteam_user_session', JSON.stringify(currentUser));
+                    renderDynamicDashboard(currentUser);
                 } else {
                     alert(data.message);
                 }
-            } catch (err) {
-                alert('Login connection error.');
-            }
+            } catch (err) { alert('Login error.'); }
         }
 
-        function renderUserDashboard(user) {
-            document.getElementById('ws-name').innerText = user.name;
-            document.getElementById('ws-role-badge').innerText = `${user.role} • ${user.department}`;
-            document.getElementById('ws-content').innerHTML = `
-                <div class="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
-                    <div class="font-bold text-slate-900 dark:text-white">Workspace Session Active</div>
-                    <p class="text-slate-500">Authenticated securely via Supabase database records for department: ${user.department}.</p>
-                </div>
-            `;
+        function renderDynamicDashboard(user) {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-shell').classList.remove('hidden');
+            document.getElementById('role-header-badge').classList.remove('hidden');
+            document.getElementById('role-header-badge').innerText = user.role;
+
+            document.getElementById('sidebar-username').innerText = user.name;
+            document.getElementById('sidebar-role').innerText = `${user.role} • ${user.department}`;
+            document.getElementById('user-avatar').innerText = user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            buildSidebarAndTabs(user);
+        }
+
+        // --- Role-Aware Dynamic Sidebar & Tabs Engine ---
+        function buildSidebarAndTabs(user) {
+            const nav = document.getElementById('sidebar-nav');
+            const content = document.getElementById('main-content-area');
+            nav.innerHTML = '';
+            content.innerHTML = '';
+
+            let tabs = [];
+
+            if (user.role === 'Super-Alpha-Admin') {
+                tabs = [
+                    { id: 'home', label: '🏠 Dashboard', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name} (Super-Alpha)</h2><p class="text-xs text-slate-500 mt-1">Full platform master control active.</p></div>` },
+                    { id: 'companies', label: '🏢 Companies', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4"><h3 class="text-sm font-bold text-[#a16836]">Global Enterprises</h3><div id="dyn-companies" class="space-y-2 text-xs"></div></div>` },
+                    { id: 'messages', label: '💬 Leave a Message', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4"><h3 class="text-sm font-bold text-[#a16836]">System Directives</h3><input id="dyn-msg" type="text" placeholder="Global directive..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs"><button onclick="sendGlobalMsg()" class="px-4 py-2 bg-[#a16836] text-white rounded-lg text-xs font-semibold">Broadcast</button></div>` }
+                ];
+            } else if (user.role === 'Admin') {
+                // Company Head
+                tabs = [
+                    { id: 'home', label: '🏠 Company Dashboard', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name} (Company Head)</h2><p class="text-xs text-slate-500 mt-1">Managing Company ID: ${user.company_id}</p></div>` },
+                    { id: 'personnel', label: '👥 Department & Shift Heads', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4"><h3 class="text-sm font-bold text-[#a16836]">Company Personnel</h3><div id="dyn-personnel" class="space-y-2 text-xs"></div></div>` },
+                    { id: 'messages', label: '💬 Messages', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h3 class="text-sm font-bold text-[#a16836]">Company Inbox & Directives</h3><p class="text-xs text-slate-500">Directives from Super-Alpha and management.</p></div>` }
+                ];
+            } else {
+                // Department-Head, Shift-Head, Worker
+                tabs = [
+                    { id: 'home', label: '🏠 Operational Workspace', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold">Welcome, ${user.name} (${user.role})</h2><p class="text-xs text-slate-500 mt-1">Department: ${user.department}</p></div>` },
+                    { id: 'tasks', label: '📋 Work Queue & Attendance', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h3 class="text-sm font-bold text-[#a16836]">Daily Performance & Telemetry Scorecard</h3><p class="text-xs text-slate-500 mt-1">Status: Active & Clocked In.</p></div>` },
+                    { id: 'messages', label: '💬 Directives', html: `<div class="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"><h3 class="text-sm font-bold text-[#a16836]">Directives</h3><p class="text-xs text-slate-500">Company announcements and role notifications.</p></div>` }
+                ];
+            }
+
+            tabs.forEach((tab, index) => {
+                nav.innerHTML += `<button onclick="switchDynTab('${tab.id}')" id="nav-${tab.id}" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">${tab.label}</button>`;
+                content.innerHTML += `<div id="tab-${tab.id}" class="${index === 0 ? '' : 'hidden'} space-y-6">${tab.html}</div>`;
+            });
+
+            if (user.role === 'Super-Alpha-Admin') loadDynCompanies();
+            if (user.role === 'Admin') loadDynPersonnel(user.company_id);
+        }
+
+        function switchDynTab(tabId) {
+            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id^="nav-"]').forEach(el => {
+                el.className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition";
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabId}`).className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[#a16836]/10 text-[#a16836] transition";
+        }
+
+        async function loadDynCompanies() {
+            const res = await fetch('/api/companies');
+            const data = await res.json();
+            const container = document.getElementById('dyn-companies');
+            if (!container) return;
+            container.innerHTML = '';
+            data.companies.forEach(c => {
+                container.innerHTML += `<div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between"><div><strong>${c.company_name}</strong> (ID: ${c.id}) - Sector: ${c.industry}</div></div>`;
+            });
+        }
+
+        async function loadDynPersonnel(companyId) {
+            const res = await fetch(`/api/users?company_id=${companyId}`);
+            const data = await res.json();
+            const container = document.getElementById('dyn-personnel');
+            if (!container) return;
+            container.innerHTML = '';
+            data.users.forEach(u => {
+                container.innerHTML += `<div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between"><div><strong>${u.name}</strong> (${u.role}) - Dept: ${u.department}</div></div>`;
+            });
+        }
+
+        async function sendGlobalMsg() {
+            const text = document.getElementById('dyn-msg').value;
+            if (!text) return alert('Enter message.');
+            await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target_type: 'ROLE', target_id: 'All', message_text: text, sender: currentUser.name })
+            });
+            alert('Directive broadcasted.');
+            document.getElementById('dyn-msg').value = '';
+        }
+
+        function logout() {
+            localStorage.removeItem('onteam_user_session');
+            location.reload();
         }
     </script>
 </body>
