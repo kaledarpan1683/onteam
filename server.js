@@ -157,7 +157,7 @@ app.delete('/api/users/:id', async (req, res) => {
     res.json({ success: true, message: 'User deleted successfully.' });
 });
 
-// Messaging System
+// Messaging System with Timestamp
 app.get('/api/messages', async (req, res) => {
     const { data, error } = await supabase.from('system_messages').select('*').order('id', { ascending: false });
     if (error) return res.json({ success: true, messages: [] });
@@ -165,15 +165,24 @@ app.get('/api/messages', async (req, res) => {
 });
 
 app.post('/api/messages', async (req, res) => {
-    const { target_type, target_id, message_text, sender } = req.body;
+    const { target_type, target_id, message_text, sender, sender_role } = req.body;
+    const timestamp = new Date().toISOString();
+
     const { data, error } = await supabase
         .from('system_messages')
-        .insert([{ target_type, target_id, message_text, sender: sender || 'System' }])
+        .insert([{ 
+            target_type, 
+            target_id, 
+            message_text, 
+            sender: sender || 'System',
+            sender_role: sender_role || 'User',
+            created_at: timestamp 
+        }])
         .select()
         .single();
 
     if (error) return res.status(500).json({ success: false, message: 'Failed to post message.' });
-    res.json({ success: true, message: 'Directive broadcasted successfully!' });
+    res.json({ success: true, message: 'Announcement/Complaint broadcasted successfully!' });
 });
 
 // Single Unified Login Route
